@@ -1,5 +1,3 @@
-import 'package:climax_it_user_app/screens/payment_gateway/check.dart';
-import 'package:climax_it_user_app/screens/payment_gateway/checkout.dart';
 import 'package:climax_it_user_app/screens/splash_screen/splash_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_downloader/flutter_downloader.dart';
@@ -21,8 +19,7 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'Climax IT',
       theme: themeData,
-      //home: SplashScreen(),
-      home: CheckUddoktapay(),
+      home: SplashScreen(),
     );
   }
 
