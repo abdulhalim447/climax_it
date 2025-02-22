@@ -1,11 +1,16 @@
+import 'dart:convert';
+import 'dart:developer';
+
 import 'package:climax_it_user_app/screens/app_download/app_download.dart';
 import 'package:climax_it_user_app/screens/micro_job/show_job_grid.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:http/http.dart' as http;
 
 import '../../auth/saved_login/user_session.dart';
 import '../../slider/home_screen_slider.dart';
+import '../../widgets/web_view.dart';
 import '../course/course_list_page.dart';
 import '../digital_service/digital_service.dart';
 import '../drive_offer/drive_offer.dart';
@@ -357,6 +362,93 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  // Future<void> createCheckout() async {
+  //   const String apiKey = "8709a1c0315b7f024c346fdf20e381931b564bb9"; // Use correct API key
+  //   const String url = "https://pay.climaxitbd.com/api/checkout-v2"; // Correct API URL
+  //
+  //   final response = await http.post(
+  //     Uri.parse(url),
+  //     headers: {
+  //       "Content-Type": "application/json",
+  //       "Accept": "application/json",
+  //       "RT-UDDOKTAPAY-API-KEY": apiKey, // Correct API key header
+  //     },
+  //     body: jsonEncode({
+  //       "full_name": "John Doe",
+  //       "email": "johndoe@example.com",
+  //       "amount": 500,
+  //       "currency": "BDT",
+  //       "redirect_url": "https://yourapp.com/success",
+  //       "webhook_url": "https://yourapp.com/webhook",
+  //       "reference": "order_123456",
+  //     }),
+  //   );
+  //
+  //   print("Response: ${response.body}");
+  //
+  //   if (response.statusCode == 200) {
+  //     final data = jsonDecode(response.body);
+  //     print("Payment URL: ${data['payment_url']}");
+  //   } else {
+  //     print("Error: ${response.body}");
+  //   }
+  // }
+
+  ///for payment
+  Future<void> createCheckout({
+    required String fullName,
+    required String email,
+    required String amount,
+    required String userId,
+    required String orderId,
+  }) async {
+    const String baseURL = "https://demo.uddoktapay.com/";
+    const String apiKey = "f1d5bd54b659a131aad3020f1bbcd15e5bd275d9"; // Use correct API key
+
+    final Uri url = Uri.parse("${baseURL}api/checkout-v2");
+
+    final Map<String, dynamic> fields = {
+      "full_name": fullName,
+      "email": email,
+      "amount": amount,
+      "metadata": {
+        "user_id": userId,
+        "order_id": orderId
+      },
+      "redirect_url": "${baseURL}success.php",
+      "return_type": "GET",
+      "cancel_url": "${baseURL}cancel.php",
+      "webhook_url": "https://demo.uddoktapay.com/callback/ab001e8f801928c87662e58031416739d0323e67"
+    };
+
+    try {
+      final response = await http.post(
+        url,
+        headers: {
+          "RT-UDDOKTAPAY-API-KEY": apiKey,
+          "Accept": "application/json",
+          "Content-Type": "application/json"
+        },
+        body: jsonEncode(fields),
+      );
+
+      print("Response: ${response.body}");
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        print("Payment URL: ${data['payment_url']}");
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => PaymentWebView(paymentUrl: data['payment_url'],)),
+        );
+      } else {
+        print("Error: ${response.body}");
+      }
+    } catch (e) {
+      print("Exception: $e");
+    }
+  }
+
   Widget _idVerificationSection() {
     return Center(
       child: Padding(
@@ -380,9 +472,11 @@ class _HomePageState extends State<HomePage> {
               ),
               const SizedBox(height: 8),
               ElevatedButton(
-                onPressed: () {},
+                onPressed: () {
+                  createCheckout(fullName: 'John', email: 'test@gmail.com', amount: '10', userId: '10', orderId: '11');
+                },
                 child:
-                    const Text('Verify', style: TextStyle(color: Colors.white)),
+                const Text('Verify', style: TextStyle(color: Colors.white)),
               ),
             ],
           ),
