@@ -23,6 +23,11 @@ class _PaymentWebViewState extends State<PaymentWebView> {
         onPageStarted: (String url) {
           print("Page started loading: $url");
 
+
+        },
+        // This is triggered when a page finishes loading
+        onPageFinished: (String url) {
+          print("Page finished loading: $url");
           // Check if the URL contains 'success.php'
           if (url.contains("success.php")) {
             _closeWebView("Payment Successful!", true); // Call close method on success
@@ -37,10 +42,6 @@ class _PaymentWebViewState extends State<PaymentWebView> {
           else if (url.contains("pending")) {
             _closeWebView("Payment Pending", false); // Call close method on pending
           }
-        },
-        // This is triggered when a page finishes loading
-        onPageFinished: (String url) {
-          print("Page finished loading: $url");
         },
         onNavigationRequest: (NavigationRequest request) {
           // Log every URL being loaded in the WebView
