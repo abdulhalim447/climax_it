@@ -69,6 +69,7 @@ class _LoginScreenState extends State<LoginScreen> {
           final userData = responseData['data'];
           String token = userData['token'];
           String name = userData['name'];
+          String email = userData['email'];
           String referCode = userData['referCode'];
           String userID = userData['id'].toString();
 
@@ -76,7 +77,7 @@ class _LoginScreenState extends State<LoginScreen> {
           // Save data to UserSession
           //await UserSession.saveSession(token, fullPhone, name, referCode);
           // Save data to UserSession
-          await UserSession.saveSession(token, fullPhone, name, referCode,userID);
+          await UserSession.saveSession(token, fullPhone, name, referCode,userID,email);
 
 
           // Navigate to the next screen

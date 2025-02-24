@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:developer';
 
 import 'package:climax_it_user_app/screens/app_download/app_download.dart';
 import 'package:climax_it_user_app/screens/micro_job/show_job_grid.dart';
@@ -25,6 +24,81 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  bool isVerified = false;
+  String userId = "";
+  String name = "";
+  String email = "";
+
+  @override
+  void initState() {
+    super.initState();
+    _userInfo().then((_) {
+      if (userId.isNotEmpty) {
+        _checkUserVerification(); // Only check verification after userId is set
+      }
+    });
+  }
+
+  Future<void> _userInfo() async {
+    try {
+      String? fetchedUserId = await UserSession.getUserID();
+      String? fetchedEmail = await UserSession.getEmail();
+      String? fetchedName = await UserSession.getName();
+
+      // Null চেক করে UI আপডেট করো
+      if (fetchedUserId != null &&
+          fetchedEmail != null &&
+          fetchedName != null) {
+        setState(() {
+          userId = fetchedUserId;
+          email = fetchedEmail;
+          name = fetchedName;
+        });
+
+        print("User ID: $userId, Email: $email, Name: $name");
+      } else {
+        print("User data is null");
+      }
+    } catch (e) {
+      print("Error fetching user info: $e");
+    }
+  }
+
+  Future<void> _checkUserVerification() async {
+    try {
+      final response = await http.get(Uri.parse(
+          "https://climaxitbd.com/php/wallet/check_user_verify.php?user_id=$userId"));
+
+      print("Verification Response Status: ${response.statusCode}");
+      print("Verification Response Body: ${response.body}");
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+
+        // Make sure we're checking the exact value and type
+        setState(() {
+          // Convert to int first to ensure proper comparison
+          int verificationStatus = data["isVarified"] is String
+              ? int.parse(data["isVarified"])
+              : data["isVarified"];
+          isVerified = verificationStatus == 1;
+        });
+
+        print("Verification Status: $isVerified");
+      } else {
+        print("Failed to fetch verification status: ${response.statusCode}");
+        setState(() {
+          isVerified = false; // Default to false on error
+        });
+      }
+    } catch (e) {
+      print("Error checking verification: $e");
+      setState(() {
+        isVerified = false; // Default to false on error
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -45,15 +119,6 @@ class _HomePageState extends State<HomePage> {
             // আসন্ন ফিচার সমূহ
             _buildSectionTitle('আসন্ন ফিচার-সমূহ'),
             _buildUpcomingFeatureGrid(),
-
-            /*            // স্কল ক্যাটাগরি
-            _buildSectionTitle('সবকিছু ক্যাটাগরি'),
-            _buildCategoryScroll(),
-
-            // সমস্ত পণ্য
-            _buildSectionTitle('সমস্ত পণ্য'),
-            _buildProductGrid(),
-            */
           ],
         ),
       ),
@@ -362,38 +427,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  // Future<void> createCheckout() async {
-  //   const String apiKey = "8709a1c0315b7f024c346fdf20e381931b564bb9"; // Use correct API key
-  //   const String url = "https://pay.climaxitbd.com/api/checkout-v2"; // Correct API URL
-  //
-  //   final response = await http.post(
-  //     Uri.parse(url),
-  //     headers: {
-  //       "Content-Type": "application/json",
-  //       "Accept": "application/json",
-  //       "RT-UDDOKTAPAY-API-KEY": apiKey, // Correct API key header
-  //     },
-  //     body: jsonEncode({
-  //       "full_name": "John Doe",
-  //       "email": "johndoe@example.com",
-  //       "amount": 500,
-  //       "currency": "BDT",
-  //       "redirect_url": "https://yourapp.com/success",
-  //       "webhook_url": "https://yourapp.com/webhook",
-  //       "reference": "order_123456",
-  //     }),
-  //   );
-  //
-  //   print("Response: ${response.body}");
-  //
-  //   if (response.statusCode == 200) {
-  //     final data = jsonDecode(response.body);
-  //     print("Payment URL: ${data['payment_url']}");
-  //   } else {
-  //     print("Error: ${response.body}");
-  //   }
-  // }
-
+//=================================================================================================
   ///for payment
   Future<void> createCheckout({
     required String fullName,
@@ -402,8 +436,8 @@ class _HomePageState extends State<HomePage> {
     required String userId,
     required String orderId,
   }) async {
-    const String baseURL = "https://demo.uddoktapay.com/";
-    const String apiKey = "f1d5bd54b659a131aad3020f1bbcd15e5bd275d9"; // Use correct API key
+    const String baseURL = "https://pay.climaxitbd.com/";
+    const String apiKey = "58c3af0decc37110a275a8ecabc4d68d6955fc80"; // API key
 
     final Uri url = Uri.parse("${baseURL}api/checkout-v2");
 
@@ -411,14 +445,13 @@ class _HomePageState extends State<HomePage> {
       "full_name": fullName,
       "email": email,
       "amount": amount,
-      "metadata": {
-        "user_id": userId,
-        "order_id": orderId
-      },
+      "metadata": {"user_id": userId, "order_id": orderId},
       "redirect_url": "${baseURL}success.php",
       "return_type": "GET",
       "cancel_url": "${baseURL}cancel.php",
-      "webhook_url": "https://demo.uddoktapay.com/callback/ab001e8f801928c87662e58031416739d0323e67"
+      "webhook_url":
+          "https://pay.climaxitbd.com/callback/ae673c586c0a56ce5c10a304bd1c26e0cd87d120"
+      // webhook ====
     };
 
     try {
@@ -439,7 +472,10 @@ class _HomePageState extends State<HomePage> {
         print("Payment URL: ${data['payment_url']}");
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => PaymentWebView(paymentUrl: data['payment_url'],)),
+          MaterialPageRoute(
+              builder: (context) => PaymentWebView(
+                    paymentUrl: data['payment_url'],
+                  )),
         );
       } else {
         print("Error: ${response.body}");
@@ -449,6 +485,7 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+//=============================================================================
   Widget _idVerificationSection() {
     return Center(
       child: Padding(
@@ -464,7 +501,7 @@ class _HomePageState extends State<HomePage> {
           child: Column(
             children: [
               const Text(
-                'আইডি ভেরিফাই করুন',
+                'আপনার একাউন্ট ভেরিফাই করা হয়নি। আমাদের সকল সার্ভিস ব্যাবহার করার জন্য একাউন্ট ভেরিফাই করুন। ধন্যবাদ ',
                 style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
@@ -472,11 +509,16 @@ class _HomePageState extends State<HomePage> {
               ),
               const SizedBox(height: 8),
               ElevatedButton(
-                onPressed: () {
-                  createCheckout(fullName: 'John', email: 'test@gmail.com', amount: '10', userId: '10', orderId: '11');
+                onPressed: () async {
+                  createCheckout(
+                      fullName: name!,
+                      email: email!,
+                      amount: '10',
+                      userId: userId!,
+                      orderId: '');
                 },
                 child:
-                const Text('Verify', style: TextStyle(color: Colors.white)),
+                    const Text('Verify', style: TextStyle(color: Colors.white)),
               ),
             ],
           ),
@@ -540,19 +582,28 @@ class _HomePageState extends State<HomePage> {
         itemBuilder: (context, index) {
           final item = services[index];
           return GestureDetector(
-            onTap: () {
-              // আলাদা স্ক্রিনে নেভিগেট করুন
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => screens[index]),
-              );
-            },
+            onTap: isVerified
+                ? () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => screens[index]),
+                    );
+                  }
+                : () {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text("আপনার একাউন্টটি ভেরিফাই করুন!"),
+                        duration: Duration(seconds: 2),
+                        backgroundColor: Colors.red,
+                      ),
+                    );
+                  },
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 CircleAvatar(
                   radius: 24,
-                  backgroundColor: Colors.blue,
+                  backgroundColor: isVerified ? Colors.blue : Colors.grey,
                   child: Image.asset(
                     item["icon"] ?? "",
                     width: 30,
@@ -606,7 +657,7 @@ class _HomePageState extends State<HomePage> {
             children: [
               CircleAvatar(
                 radius: 24,
-                backgroundColor: Colors.blue,
+                backgroundColor: isVerified ? Colors.blue : Colors.grey,
                 child: Text(
                   item["icon"] ?? "",
                   style: const TextStyle(fontSize: 20),

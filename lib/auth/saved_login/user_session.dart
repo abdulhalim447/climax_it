@@ -2,13 +2,14 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class UserSession {
   static Future<void> saveSession(String token, String phone, String name,
-      String referCode,String userID,) async {
+      String referCode,String userID,email) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     prefs.setString('token', token);
     prefs.setString('phone', phone);
     prefs.setString('name', name);
     prefs.setString('referCode', referCode);
     prefs.setString('userID', userID);
+    prefs.setString('email', email);
 
 
   }
@@ -32,6 +33,10 @@ class UserSession {
   static Future<String?> getName() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     return prefs.getString('name');
+  }
+  static Future<String?> getEmail() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.getString('email');
   }
 
   static Future<String?> getReferCode() async {
