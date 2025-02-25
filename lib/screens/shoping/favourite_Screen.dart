@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:climax_it_user_app/screens/shoping/product.dart';
 import 'dart:convert'; // to decode JSON data
+import 'package:climax_it_user_app/screens/shoping/ProductDetailScreen.dart';
 
 class FavoriteScreen extends StatefulWidget {
   @override
@@ -45,42 +46,51 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
               itemCount: _favoriteProducts.length,
               itemBuilder: (context, index) {
                 final product = _favoriteProducts[index];
-                return Card(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+                return GestureDetector(
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) =>
+                          ProductDetailScreen(product: product),
+                    ),
                   ),
-                  elevation: 4,
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Column(
-                      children: [
-                        CachedNetworkImage(
-                          imageUrl: product.thumbnail,
-                          height: 120,
-                          width: double.infinity,
-                          fit: BoxFit.cover,
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Column(
-                            children: [
-                              Text(
-                                product.productName,
-                                style: const TextStyle(
-                                    fontWeight: FontWeight.bold),
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                              Text(
-                                'TK ${product.resellerPrice} | Stock ${product.stock}',
-                                style: TextStyle(
-                                    color: Colors.green.shade700,
-                                    fontWeight: FontWeight.w600),
-                              ),
-                            ],
+                  child: Card(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    elevation: 4,
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Column(
+                        children: [
+                          CachedNetworkImage(
+                            imageUrl: product.thumbnail,
+                            height: 120,
+                            width: double.infinity,
+                            fit: BoxFit.cover,
                           ),
-                        ),
-                      ],
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Column(
+                              children: [
+                                Text(
+                                  product.productName,
+                                  style: const TextStyle(
+                                      fontWeight: FontWeight.bold),
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                Text(
+                                  'TK ${product.resellerPrice} | Stock ${product.stock}',
+                                  style: TextStyle(
+                                      color: Colors.green.shade700,
+                                      fontWeight: FontWeight.w600),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 );

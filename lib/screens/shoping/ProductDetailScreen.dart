@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:climax_it_user_app/screens/shoping/CartScreen.dart';
@@ -7,6 +8,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:climax_it_user_app/screens/shoping/checkout_screen.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:dio/dio.dart';
+import 'package:path_provider/path_provider.dart';
 
 class ProductDetailScreen extends StatefulWidget {
   final Product product;
@@ -84,6 +88,87 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
         .showSnackBar(const SnackBar(content: Text("Removed from Favorites!")));
   }
 
+  // Add this method to handle downloads
+  Future<void> _downloadImages() async {
+    try {
+      // Request storage permission
+      var status = await Permission.storage.request();
+      if (!status.isGranted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+              content: Text('Storage permission required to download images')),
+        );
+        return;
+      }
+
+      // Show loading dialog
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+
+      final dio = Dio();
+      String basePath = "";
+
+      // Determine save path based on platform
+      if (Platform.isAndroid) {
+        basePath =
+            "/storage/emulated/0/Download/ClimaxIT/${widget.product.productCode}";
+      } else {
+        final directory = await getApplicationDocumentsDirectory();
+        basePath = "${directory.path}/ClimaxIT/${widget.product.productCode}";
+      }
+
+      // Create directory if it doesn't exist
+      final directory = Directory(basePath);
+      if (!await directory.exists()) {
+        await directory.create(recursive: true);
+      }
+
+      // Download thumbnail
+      if (widget.product.thumbnail.isNotEmpty) {
+        var response = await dio.get(
+          widget.product.thumbnail,
+          options: Options(responseType: ResponseType.bytes),
+        );
+
+        File thumbnailFile = File('$basePath/thumbnail.jpg');
+        await thumbnailFile.writeAsBytes(response.data);
+      }
+
+      // Download product images
+      for (int i = 0; i < widget.product.images.length; i++) {
+        if (widget.product.images[i].isEmpty) continue;
+
+        var response = await dio.get(
+          widget.product.images[i],
+          options: Options(responseType: ResponseType.bytes),
+        );
+
+        File imageFile = File('$basePath/image_$i.jpg');
+        await imageFile.writeAsBytes(response.data);
+      }
+
+      // Hide loading dialog
+      Navigator.pop(context);
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Images downloaded successfully!'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+    } catch (e) {
+      Navigator.pop(context); // Hide loading dialog
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error downloading images: $e')),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -100,8 +185,10 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                     MaterialPageRoute(builder: (context) => CartScreen()));
               },
               icon: const Icon(Icons.shopping_cart)),
-          // this is add to  cart  button
-          IconButton(onPressed: () {}, icon: const Icon(Icons.download)),
+
+          IconButton(
+              onPressed: _downloadImages,
+              icon: const Icon(Icons.download)), // this is download button
         ],
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -141,29 +228,47 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               CachedNetworkImage(
-                imageUrl: widget.product.thumbnail,
+                imageUrl: widget.product.thumbnail.isNotEmpty
+                    ? widget.product.thumbnail
+                    : 'https://via.placeholder.com/300', // Fallback image URL
                 height: 300,
                 width: double.infinity,
                 fit: BoxFit.cover,
+                errorWidget: (context, url, error) => const Icon(Icons.error),
+                placeholder: (context, url) => const Center(
+                  child: CircularProgressIndicator(),
+                ),
               ),
               const SizedBox(height: 12),
               SizedBox(
                 height: 60,
                 child: ListView.builder(
                   scrollDirection: Axis.horizontal,
-                  itemCount: widget.product.images.length,
-                  itemBuilder: (context, index) => Padding(
-                    padding: const EdgeInsets.only(right: 8.0),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(8.0),
-                      child: CachedNetworkImage(
-                        imageUrl: widget.product.images[index],
-                        height: 60,
-                        width: 60,
-                        fit: BoxFit.cover,
+                  itemCount: widget.product.images
+                      .where((url) => url.isNotEmpty)
+                      .length,
+                  itemBuilder: (context, index) {
+                    final imageUrl = widget.product.images[index];
+                    if (imageUrl.isEmpty) return const SizedBox.shrink();
+
+                    return Padding(
+                      padding: const EdgeInsets.only(right: 8.0),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(8.0),
+                        child: CachedNetworkImage(
+                          imageUrl: imageUrl,
+                          height: 60,
+                          width: 60,
+                          fit: BoxFit.cover,
+                          errorWidget: (context, url, error) =>
+                              const Icon(Icons.error),
+                          placeholder: (context, url) => const Center(
+                            child: CircularProgressIndicator(),
+                          ),
+                        ),
                       ),
-                    ),
-                  ),
+                    );
+                  },
                 ),
               ),
               const SizedBox(height: 12),
