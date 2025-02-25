@@ -230,7 +230,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
               CachedNetworkImage(
                 imageUrl: widget.product.thumbnail.isNotEmpty
                     ? widget.product.thumbnail
-                    : 'https://via.placeholder.com/300', // Fallback image URL
+                    : 'https://via.placeholder.com/300',
+                // Fallback image URL
                 height: 300,
                 width: double.infinity,
                 fit: BoxFit.cover,

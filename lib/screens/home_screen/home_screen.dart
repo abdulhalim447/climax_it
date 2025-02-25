@@ -454,7 +454,6 @@ class _HomePageState extends State<HomePage> {
       // webhook ====
     };
 
-
     try {
       final response = await http.post(
         url,
@@ -488,42 +487,57 @@ class _HomePageState extends State<HomePage> {
 
 //=============================================================================
   Widget _idVerificationSection() {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.only(left: 16.0, right: 16.0),
-        child: Container(
-          width: double.maxFinite,
-          margin: const EdgeInsets.symmetric(vertical: 8),
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: Colors.blue,
-            borderRadius: BorderRadius.circular(12),
+    // If verified, return an empty container (invisible)
+    if (isVerified) {
+      return const SizedBox.shrink();
+    }
+
+    // Show verification section only if not verified
+    return Container(
+      margin: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.red.shade100,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'আপনার একাউন্টটি ভেরিফাই করুন!',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: Colors.red,
+            ),
           ),
-          child: Column(
-            children: [
-              const Text(
-                'আপনার একাউন্ট ভেরিফাই করা হয়নি। আমাদের সকল সার্ভিস ব্যাবহার করার জন্য একাউন্ট ভেরিফাই করুন। ধন্যবাদ ',
-                style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white),
-              ),
-              const SizedBox(height: 8),
-              ElevatedButton(
-                onPressed: () async {
-                  createCheckout(
-                      fullName: name!,
-                      email: email!,
-                      amount: '10',
-                      userId: userId!,
-                      orderId: '');
-                },
-                child:
-                    const Text('Verify', style: TextStyle(color: Colors.white)),
-              ),
-            ],
+          const SizedBox(height: 8),
+          const Text(
+            'সার্ভিস ব্যবহার করতে আপনার একাউন্টটি ভেরিফাই করা প্রয়োজন।',
+            style: TextStyle(color: Colors.red),
           ),
-        ),
+          const SizedBox(height: 12),
+          Align(
+            alignment: Alignment.center,
+            child: ElevatedButton(
+              onPressed: () async {
+                createCheckout(
+                    fullName: name!,
+                    email: email!,
+                    amount: '10',
+                    userId: userId!,
+                    orderId: '');
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red,
+              ),
+              child: const Text(
+                'ভেরিফাই করুন',
+                style: TextStyle(color: Colors.white),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -563,11 +577,6 @@ class _HomePageState extends State<HomePage> {
       DigitalServiceScreen(),
       AppGridScreen()
 
-      /*
-      MacroJobScreen(),
-      SkillAchievementScreen(),
-      ResellingScreen(),
-      DigitalServiceScreen(),*/
     ];
 
     return Padding(
