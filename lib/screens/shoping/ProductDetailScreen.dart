@@ -6,6 +6,7 @@ import 'package:climax_it_user_app/screens/shoping/product.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:climax_it_user_app/screens/shoping/checkout_screen.dart';
 
 class ProductDetailScreen extends StatefulWidget {
   final Product product;
@@ -38,8 +39,6 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
           (favProduct) => favProduct.productCode == widget.product.productCode);
     });
   }
-
-
 
   Future<void> _addToFavorites(Product product) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -257,7 +256,18 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
               SizedBox(
                 width: double.maxFinite,
                 child: ElevatedButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => CheckoutScreen(
+                          product: widget.product,
+                          initialQuantity:
+                              1, // Or whatever quantity you want to start with
+                        ),
+                      ),
+                    );
+                  },
                   child: const Text(
                     'Order Now',
                     style: TextStyle(fontSize: 18, color: Colors.white),
@@ -308,7 +318,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
         .map((jsonStr) => Product.fromJson(json.decode(jsonStr)))
         .toList();
 
-    if (!cart.any((cartProduct) => cartProduct.productCode == product.productCode)) {
+    if (!cart
+        .any((cartProduct) => cartProduct.productCode == product.productCode)) {
       cart.add(product);
       cartJson = cart.map((p) => json.encode(p.toJson())).toList();
       await prefs.setStringList('cart', cartJson);
@@ -316,15 +327,11 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
       // Print the cart after adding the product
       print("Cart after adding product: $cartJson");
 
-      ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Added to Cart!"))
-      );
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text("Added to Cart!")));
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Already in Cart!"))
-      );
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text("Already in Cart!")));
     }
   }
-
-
 }
