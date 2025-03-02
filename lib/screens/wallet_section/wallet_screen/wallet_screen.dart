@@ -12,15 +12,11 @@ class WalletScreen extends StatefulWidget {
 class _WalletScreenState extends State<WalletScreen> {
   String balance = "৳00";
 
-
   @override
   void initState() {
     super.initState();
     fetchBalance();
-
   }
-
-
 
   Future<void> fetchBalance() async {
     String? userId = await UserSession.getUserID();
@@ -30,9 +26,7 @@ class _WalletScreenState extends State<WalletScreen> {
     }
 
     print(userId);
-    String apiUrl =
-        "https://climaxitbd.com/php/income_filter/get_main_balance.php";
-
+    String apiUrl = "https://climaxitbd.com/php/income_filter/get_main_balance.php";
 
     try {
       var response = await http.post(
@@ -52,7 +46,6 @@ class _WalletScreenState extends State<WalletScreen> {
         } else {
           setState(() {
             balance = balance;
-            //balance = "Error: ${data['message']}";
           });
         }
       } else {
@@ -109,13 +102,13 @@ class _WalletScreenState extends State<WalletScreen> {
           Expanded(
             child: ListView(
               children: [
-                buildCardItem(context, 'শপিং ব্যালেন্স দেখুন', ''),
+                buildCardItem(context, 'শপিং ব্যালেন্স দেখুন', 'shopping'),
                 buildCardItem(context, 'আজকের ইনকাম', 'today'),
                 buildCardItem(context, 'গতকালের ইনকাম', 'yesterday'),
                 buildCardItem(context, '৭ দিনের ইনকাম', '7days'),
                 buildCardItem(context, '৩০ দিনের ইনকাম', '30days'),
                 buildCardItem(context, 'এখন পর্যন্ত মোট ইনকাম', 'all'),
-                buildCardItem(context, 'মোট ইনকাম ইউথড্র', ''),
+                buildCardItem(context, 'মোট ইনকাম ইউথড্র', 'withdraw'),
               ],
             ),
           ),
@@ -133,12 +126,66 @@ class _WalletScreenState extends State<WalletScreen> {
       elevation: 4,
       child: ListTile(
         onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => IncomeScreen(filter: filter, title: title),
-            ),
-          );
+          // Switch case for navigation
+          switch (filter) {
+            case 'shopping':
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => IncomeScreen(filter: filter, title: title),
+                ),
+              );case 'today':
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => IncomeScreen(filter: filter, title: title),
+                ),
+              );
+              break;
+            case 'yesterday':
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => IncomeScreen(filter: filter, title: title),
+                ),
+              );
+              break;
+            case '7days':
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => IncomeScreen(filter: filter, title: title),
+                ),
+              );
+              break;
+            case '30days':
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => IncomeScreen(filter: filter, title: title),
+                ),
+              );
+              break;
+            case 'all':
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => IncomeScreen(filter: filter, title: title),
+                ),
+              );
+              break;
+            case 'withdraw':
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => IncomeScreen(filter: filter, title: title),
+                ),
+              );
+              break;
+            default:
+            // Handle default case if needed
+              break;
+          }
         },
         leading: Icon(Icons.folder, color: Colors.blue),
         title: Text(title),

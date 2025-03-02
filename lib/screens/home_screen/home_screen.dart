@@ -513,8 +513,8 @@ class _HomePageState extends State<HomePage> {
           ),
           const SizedBox(height: 8),
           const Text(
-            'সার্ভিস ব্যবহার করতে আপনার একাউন্টটি ভেরিফাই করা প্রয়োজন।',
-            style: TextStyle(color: Colors.red),
+            'আমাদের সকল সার্ভিস ব্যবহার করতে আপনার একাউন্টটি ভেরিফাই করুন। ধন্যবাদ।',
+            style: TextStyle(color: Colors.red, fontSize: 14),
           ),
           const SizedBox(height: 12),
           Align(
@@ -576,7 +576,6 @@ class _HomePageState extends State<HomePage> {
       ShoppingScreen(),
       DigitalServiceScreen(),
       AppGridScreen()
-
     ];
 
     return Padding(

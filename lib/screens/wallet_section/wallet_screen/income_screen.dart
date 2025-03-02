@@ -19,7 +19,7 @@ class _IncomeScreenState extends State<IncomeScreen> {
   @override
   void initState() {
     super.initState();
-    _loadUserID(); // Load userID when the screen is initialized
+    _loadUserID();
   }
 
   // Function to load the userID from UserSession
