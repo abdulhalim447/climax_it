@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:climax_it_user_app/screens/wallet_section/wallet_screen/shopping_balance.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import '../../../auth/saved_login/user_session.dart';
@@ -132,7 +133,7 @@ class _WalletScreenState extends State<WalletScreen> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => IncomeScreen(filter: filter, title: title),
+                  builder: (context) => ShoppingBalance(),
                 ),
               );case 'today':
               Navigator.push(

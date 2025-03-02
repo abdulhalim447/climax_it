@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:climax_it_user_app/screens/app_download/app_download.dart';
 import 'package:climax_it_user_app/screens/micro_job/show_job_grid.dart';
+import 'package:climax_it_user_app/screens/wallet_section/wallet_screen/withdraw_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -15,6 +16,7 @@ import '../digital_service/digital_service.dart';
 import '../drive_offer/drive_offer.dart';
 import '../my_work_screen/my_work_screen.dart';
 import '../shoping/shoping_screen.dart';
+import 'package:climax_it_user_app/auth/LoginScreen.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -247,20 +249,21 @@ class _HomePageState extends State<HomePage> {
           ),
 
           ListTile(
-            leading: const Icon(Icons.monetization_on_outlined),
-            title: const Text('রেফার'),
-            onTap: () {
-              Navigator.pop(context);
-              print('Order History clicked!');
-            },
-          ),
-
-          ListTile(
             leading: const Icon(Icons.video_camera_front_outlined),
             title: const Text(' আমার ক্লাস'),
             onTap: () {
-              Navigator.pop(context);
-              print('Order History clicked!');
+              if (isVerified) {
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => VideoListScreen()));
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text("আপনার একাউন্টটি ভেরিফাই করুন!"),
+                    duration: Duration(seconds: 2),
+                    backgroundColor: Colors.red,
+                  ),
+                );
+              }
             },
           ),
 
@@ -268,32 +271,37 @@ class _HomePageState extends State<HomePage> {
             leading: const Icon(Icons.history),
             title: const Text('অর্ডার হিস্টোরি'),
             onTap: () {
-              Navigator.pop(context);
-              print('Order History clicked!');
+              if (isVerified) {
+                Navigator.pop(context);
+                print('Order History clicked!');
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text("আপনার একাউন্টটি ভেরিফাই করুন!"),
+                    duration: Duration(seconds: 2),
+                    backgroundColor: Colors.red,
+                  ),
+                );
+              }
             },
           ),
-          ListTile(
-            leading: const Icon(Icons.payment),
-            title: const Text('ট্রানজেকশন হিস্টোরি'),
-            onTap: () {
-              Navigator.pop(context);
-              print('Transaction History clicked!');
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.card_giftcard),
-            title: const Text('শপিং পয়েন্টস'),
-            onTap: () {
-              Navigator.pop(context);
-              print('Shopping Points clicked!');
-            },
-          ),
+
           ListTile(
             leading: const Icon(Icons.account_balance_wallet),
-            title: const Text('উইথড্র ব্যালেন্স'),
+            title: const Text('উইথড্র'),
             onTap: () {
-              Navigator.pop(context);
-              print('Withdraw Balance clicked!');
+              if (isVerified) {
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => WithdrawScreen()));
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text("আপনার একাউন্টটি ভেরিফাই করুন!"),
+                    duration: Duration(seconds: 2),
+                    backgroundColor: Colors.red,
+                  ),
+                );
+              }
             },
           ),
 
@@ -314,7 +322,6 @@ class _HomePageState extends State<HomePage> {
             leading: const Icon(Icons.call),
             title: const Text('কল'),
             onTap: () {
-              Navigator.pop(context);
               _launchURL('tel:+8801928374259');
             },
           ),
@@ -322,7 +329,6 @@ class _HomePageState extends State<HomePage> {
             leading: const Icon(Icons.facebook),
             title: const Text('ফেইসবুক'),
             onTap: () {
-              Navigator.pop(context);
               _launchURL('https://www.facebook.com/climaxitbdofficial');
             },
           ),
@@ -330,7 +336,6 @@ class _HomePageState extends State<HomePage> {
             leading: const Icon(Icons.video_library),
             title: const Text('ইউটিউব'),
             onTap: () {
-              Navigator.pop(context);
               _launchURL('https://www.youtube.com/@ClimaxITBD');
             },
           ),
@@ -338,7 +343,6 @@ class _HomePageState extends State<HomePage> {
             leading: const Icon(Icons.telegram),
             title: const Text('টেলিগ্রাম'),
             onTap: () {
-              Navigator.pop(context);
               _launchURL('https://t.me/climaxitbd');
             },
           ),
@@ -346,7 +350,6 @@ class _HomePageState extends State<HomePage> {
             leading: const Icon(Icons.camera_alt),
             title: const Text('ইন্সট্রাগ্রাম'),
             onTap: () {
-              Navigator.pop(context);
               _launchURL('');
             },
           ),
@@ -354,7 +357,6 @@ class _HomePageState extends State<HomePage> {
             leading: const Icon(Icons.zoom_in_map_outlined),
             title: const Text('এক্স'),
             onTap: () {
-              Navigator.pop(context);
               _launchURL('https://x.com/climaxitbd');
             },
           ),
@@ -363,7 +365,6 @@ class _HomePageState extends State<HomePage> {
             leading: const Icon(Icons.music_note),
             title: const Text('টিকটক'),
             onTap: () {
-              Navigator.pop(context);
               _launchURL('https://www.tiktok.com/@climaxit');
             },
           ),
@@ -418,8 +419,30 @@ class _HomePageState extends State<HomePage> {
             leading: const Icon(Icons.logout),
             title: const Text('লগআউট'),
             onTap: () {
-              Navigator.pop(context);
-              _logout(context);
+              showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return AlertDialog(
+                    title: const Text('Logout Confirmation'),
+                    content: const Text('Do you really want to logout?'),
+                    actions: <Widget>[
+                      TextButton(
+                        child: const Text('Cancel'),
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                      ),
+                      TextButton(
+                        child: const Text('Logout'),
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                          _logout(context);
+                        },
+                      ),
+                    ],
+                  );
+                },
+              );
             },
           ),
         ],
@@ -700,5 +723,9 @@ void _logout(BuildContext context) async {
   await UserSession.clearSession();
 
   // Navigate to the login screen and remove all previous screens from stack
-  Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
+  Navigator.pushAndRemoveUntil(
+    context,
+    MaterialPageRoute(builder: (context) => LoginScreen()),
+    (Route<dynamic> route) => false,
+  );
 }

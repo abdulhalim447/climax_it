@@ -1,6 +1,5 @@
 import 'package:climax_it_user_app/screens/drive_offer/drive_offer.dart';
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
