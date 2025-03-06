@@ -1,6 +1,10 @@
+import 'dart:convert';
+
 import 'package:climax_it_user_app/auth/base_url/wallet_balances/save_wallet_balances.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 
+import '../auth/saved_login/user_session.dart';
 import '../screens/home_screen/home_screen.dart';
 import '../screens/profile_setion/profle_screen.dart';
 import '../screens/shoping/shoping_screen.dart';
@@ -14,6 +18,79 @@ class MainNavigationScreen extends StatefulWidget {
 
 class _MainNavigationScreenState extends State<MainNavigationScreen> {
   int _selectedIndex = 0;
+  bool isVerified = false;
+  String userId = "";
+  String name = "";
+  String email = "";
+
+  @override
+  void initState() {
+    super.initState();
+    _userInfo().then((_) {
+      if (userId.isNotEmpty) {
+        _checkUserVerification(); // Only check verification after userId is set
+      }
+    });
+  }
+
+  Future<void> _userInfo() async {
+    try {
+      String? fetchedUserId = await UserSession.getUserID();
+      String? fetchedEmail = await UserSession.getEmail();
+      String? fetchedName = await UserSession.getName();
+
+      // Null চেক করে UI আপডেট করো
+      if (fetchedUserId != null &&
+          fetchedEmail != null &&
+          fetchedName != null) {
+        setState(() {
+          userId = fetchedUserId;
+          email = fetchedEmail;
+          name = fetchedName;
+        });
+
+      } else {
+       // print("User data is null");
+      }
+    } catch (e) {
+      //print("Error fetching user info: $e");
+    }
+  }
+
+  Future<void> _checkUserVerification() async {
+    try {
+      final response = await http.get(Uri.parse(
+          "https://climaxitbd.com/php/wallet/check_user_verify.php?user_id=$userId"));
+
+      print("Verification Response Status: ${response.statusCode}");
+      print("Verification Response Body: ${response.body}");
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+
+        // Make sure we're checking the exact value and type
+        setState(() {
+          // Convert to int first to ensure proper comparison
+          int verificationStatus = data["isVarified"] is String
+              ? int.parse(data["isVarified"])
+              : data["isVarified"];
+          isVerified = verificationStatus == 1;
+        });
+
+        print("Verification Status: $isVerified");
+      } else {
+        //print("Failed to fetch verification status: ${response.statusCode}");
+        setState(() {
+          isVerified = false; // Default to false on error
+        });
+      }
+    } catch (e) {
+      //print("Error checking verification: $e");
+      setState(() {
+        isVerified = false; // Default to false on error
+      });
+    }
+  }
 
   // List of screens for each BottomNavigationBar item
   final List<Widget> _pages = [
@@ -29,6 +106,19 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   ];
 
   void _onItemTapped(int index) {
+    if (index == 1 || index == 2 || index == 3 || index == 4) {
+      // Wallet, Shopping, Profile
+      if (!isVerified) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("আপনার একাউন্টটি ভেরিফাই করুন!"),
+            duration: Duration(seconds: 2),
+            backgroundColor: Colors.red,
+          ),
+        );
+        return; // Prevent navigation if not verified
+      }
+    }
     setState(() {
       _selectedIndex = index;
     });

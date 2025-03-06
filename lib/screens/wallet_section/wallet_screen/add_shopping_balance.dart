@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:climax_it_user_app/screens/wallet_section/wallet_screen/pay_webview/shopping_pay.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
@@ -109,8 +110,8 @@ class _AddShoppingBalanceState extends State<AddShoppingBalance> {
         Navigator.push(
           context,
           MaterialPageRoute(
-              builder: (context) => PaymentWebView(
-                paymentUrl: data['payment_url'],
+              builder: (context) => ShoppingPay(
+                paymentUrl: data['payment_url'], amount: _amountController.text,
               )),
         );
       } else {

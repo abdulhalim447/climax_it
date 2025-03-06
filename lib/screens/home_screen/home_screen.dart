@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:climax_it_user_app/screens/app_download/app_download.dart';
 import 'package:climax_it_user_app/screens/micro_job/show_job_grid.dart';
+import 'package:climax_it_user_app/screens/order_history/order_history.dart';
 import 'package:climax_it_user_app/screens/wallet_section/wallet_screen/withdraw_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -13,8 +14,10 @@ import '../../slider/home_screen_slider.dart';
 import '../../widgets/web_view.dart';
 import '../course/course_list_page.dart';
 import '../digital_service/digital_service.dart';
+import '../donation/donation.dart';
 import '../drive_offer/drive_offer.dart';
 import '../my_work_screen/my_work_screen.dart';
+import '../notification/notification_screen.dart';
 import '../shoping/shoping_screen.dart';
 import 'package:climax_it_user_app/auth/LoginScreen.dart';
 
@@ -57,12 +60,12 @@ class _HomePageState extends State<HomePage> {
           name = fetchedName;
         });
 
-        print("User ID: $userId, Email: $email, Name: $name");
+        //print("User ID: $userId, Email: $email, Name: $name");
       } else {
-        print("User data is null");
+        //print("User data is null");
       }
     } catch (e) {
-      print("Error fetching user info: $e");
+      //print("Error fetching user info: $e");
     }
   }
 
@@ -86,15 +89,15 @@ class _HomePageState extends State<HomePage> {
           isVerified = verificationStatus == 1;
         });
 
-        print("Verification Status: $isVerified");
+        //print("Verification Status: $isVerified");
       } else {
-        print("Failed to fetch verification status: ${response.statusCode}");
+        //print("Failed to fetch verification status: ${response.statusCode}");
         setState(() {
           isVerified = false; // Default to false on error
         });
       }
     } catch (e) {
-      print("Error checking verification: $e");
+      //print("Error checking verification: $e");
       setState(() {
         isVerified = false; // Default to false on error
       });
@@ -139,8 +142,7 @@ class _HomePageState extends State<HomePage> {
         IconButton(
           icon: const Icon(Icons.notifications),
           onPressed: () {
-            // এখানে আপনার নোটিফিকেশন সম্পর্কিত কোড যোগ করুন
-            print('Notification icon pressed!');
+            Navigator.push(context, MaterialPageRoute(builder: (context)=>NotificationScreen()));
           },
         ),
 
@@ -149,7 +151,7 @@ class _HomePageState extends State<HomePage> {
           icon: const Icon(Icons.call),
           onPressed: () {
             // এখানে ফোন কল করার লজিক যুক্ত করুন
-            print('Customer service icon pressed!');
+            _launchURL('tel:+8801928374259');
           },
         ),
       ],
@@ -200,7 +202,7 @@ class _HomePageState extends State<HomePage> {
                           name,
                           style: TextStyle(
                             color: Colors.white,
-                            fontSize: 18,
+                            fontSize: 14,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
@@ -213,7 +215,7 @@ class _HomePageState extends State<HomePage> {
                                   'রেফার কোড: $referCode',
                                   style: TextStyle(
                                     color: Colors.white,
-                                    fontSize: 14,
+                                    fontSize: 10,
                                     fontWeight: FontWeight.bold,
                                   ),
                                   overflow: TextOverflow.ellipsis,
@@ -272,7 +274,8 @@ class _HomePageState extends State<HomePage> {
             title: const Text('অর্ডার হিস্টোরি'),
             onTap: () {
               if (isVerified) {
-                Navigator.pop(context);
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => OrderHistory()));
                 print('Order History clicked!');
               } else {
                 ScaffoldMessenger.of(context).showSnackBar(
@@ -588,6 +591,7 @@ class _HomePageState extends State<HomePage> {
       {"icon": "assets/icons/img_3.png", "label": "রিসেলিং"},
       {"icon": "assets/icons/img_4.png", "label": "ডিজিটাল সার্ভিস"},
       {"icon": "assets/icons/img_5.png", "label": "প্রিমিয়াম অ্যাপ"},
+      {"icon": "assets/icons/img_6.png", "label": "সহায় হাত"},
     ];
 
     // আলাদা স্ক্রিনের লিস্ট
@@ -598,7 +602,8 @@ class _HomePageState extends State<HomePage> {
       VideoListScreen(),
       ShoppingScreen(),
       DigitalServiceScreen(),
-      AppGridScreen()
+      AppGridScreen(),
+      DonationScreen()
     ];
 
     return Padding(

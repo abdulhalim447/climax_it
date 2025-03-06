@@ -27,7 +27,8 @@ class _WalletScreenState extends State<WalletScreen> {
     }
 
     print(userId);
-    String apiUrl = "https://climaxitbd.com/php/income_filter/get_main_balance.php";
+    String apiUrl =
+        "https://climaxitbd.com/php/income_filter/get_main_balance.php";
 
     try {
       var response = await http.post(
@@ -109,7 +110,6 @@ class _WalletScreenState extends State<WalletScreen> {
                 buildCardItem(context, '৭ দিনের ইনকাম', '7days'),
                 buildCardItem(context, '৩০ দিনের ইনকাম', '30days'),
                 buildCardItem(context, 'এখন পর্যন্ত মোট ইনকাম', 'all'),
-                buildCardItem(context, 'মোট ইনকাম ইউথড্র', 'withdraw'),
               ],
             ),
           ),
@@ -135,11 +135,13 @@ class _WalletScreenState extends State<WalletScreen> {
                 MaterialPageRoute(
                   builder: (context) => ShoppingBalance(),
                 ),
-              );case 'today':
+              );
+            case 'today':
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => IncomeScreen(filter: filter, title: title),
+                  builder: (context) =>
+                      IncomeScreen(filter: filter, title: title),
                 ),
               );
               break;
@@ -147,7 +149,8 @@ class _WalletScreenState extends State<WalletScreen> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => IncomeScreen(filter: filter, title: title),
+                  builder: (context) =>
+                      IncomeScreen(filter: filter, title: title),
                 ),
               );
               break;
@@ -155,7 +158,8 @@ class _WalletScreenState extends State<WalletScreen> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => IncomeScreen(filter: filter, title: title),
+                  builder: (context) =>
+                      IncomeScreen(filter: filter, title: title),
                 ),
               );
               break;
@@ -163,7 +167,8 @@ class _WalletScreenState extends State<WalletScreen> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => IncomeScreen(filter: filter, title: title),
+                  builder: (context) =>
+                      IncomeScreen(filter: filter, title: title),
                 ),
               );
               break;
@@ -171,20 +176,13 @@ class _WalletScreenState extends State<WalletScreen> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => IncomeScreen(filter: filter, title: title),
-                ),
-              );
-              break;
-            case 'withdraw':
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => IncomeScreen(filter: filter, title: title),
+                  builder: (context) =>
+                      IncomeScreen(filter: filter, title: title),
                 ),
               );
               break;
             default:
-            // Handle default case if needed
+              // Handle default case if needed
               break;
           }
         },
