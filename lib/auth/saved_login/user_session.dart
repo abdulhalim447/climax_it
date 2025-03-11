@@ -2,7 +2,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class UserSession {
   static Future<void> saveSession(String token, String phone, String name,
-      String referCode,String userID,email) async {
+      String referCode,String userID,String email, String? profilePic) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     prefs.setString('token', token);
     prefs.setString('phone', phone);
@@ -10,6 +10,7 @@ class UserSession {
     prefs.setString('referCode', referCode);
     prefs.setString('userID', userID);
     prefs.setString('email', email);
+    prefs.setString('profile_pic', profilePic!);
 
 
   }
@@ -43,6 +44,12 @@ class UserSession {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     return prefs.getString('referCode');
   }
+
+  static Future<String?> getProfilePic() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.getString('profile_pic');  // Retrieve profile picture URL
+  }
+
 
   static Future<void> clearSession() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();

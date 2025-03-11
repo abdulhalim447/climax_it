@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:http/http.dart' as http;
 
+import '../../main.dart';
 import '../support/support_screen.dart';
 
 class DigitalServiceScreen extends StatefulWidget {
@@ -18,10 +19,10 @@ class _DigitalServiceScreenState extends State<DigitalServiceScreen> {
   @override
   void initState() {
     super.initState();
-    fetchApps();
+    _getDigitalService();
   }
 
-  Future<void> fetchApps() async {
+  Future<void> _getDigitalService() async {
     try {
       final response = await http.get(Uri.parse(
           'https://climaxitbd.com/php/digital_services/get_digital_srvice.php'));
@@ -77,12 +78,26 @@ class AppGridItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-              builder: (context) =>
-                  SupportScreen()), // Navigate to the support screen
-        );
+
+        if(verificationService.isVerified){
+
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) =>
+                    SupportScreen()), // Navigate to the support screen
+          );
+        }else{
+          SnackBar(
+            content: Text(
+              "আপনার একাউন্ট ভেরিফাইড নয়। একাউট ভেরিফাই করুন । ধন্যবাদ",
+              style: TextStyle(color: Colors.white), // Text color
+            ),
+            backgroundColor: Colors.red, // Red background color
+            duration: Duration(seconds: 3), // Duration for visibility
+          );
+        }
+
       },
       child: Container(
         margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),

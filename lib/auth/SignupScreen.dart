@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:country_code_picker/country_code_picker.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'auth_service.dart';
 import 'base_url/api_config.dart';
 
 class SignupScreen extends StatefulWidget {
@@ -105,9 +106,26 @@ class _SignupScreenState extends State<SignupScreen> {
         try {
           final Map<String, dynamic> responseData = json.decode(response.body);
           if (responseData['message'] == 'User registered successfully!') {
-            // Handle success
-            Navigator.pushReplacement(context,
-                MaterialPageRoute(builder: (context) => LoginScreen()));
+            // Auto login system==========
+            await AuthService.login(context, phoneController.text.trim(), password, countryCode);
+            showDialog(
+              context: context,
+              builder: (BuildContext context) {
+                return AlertDialog(
+                  title: Text('😊 স্বাগতম!'),
+                  content:
+                  Text('আপনার রেজিস্ট্রেশন সফল হয়েছে। উপভোগ করুন! ধন্যবাদ। '),
+                  actions: [
+                    TextButton(
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                      child: Text('OK'),
+                    ),
+                  ],
+                );
+              },
+            );
           } else {
             _showErrorDialog(responseData['message'] ?? 'Registration failed');
           }

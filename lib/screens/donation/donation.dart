@@ -4,7 +4,7 @@ import 'dart:convert'; // JSON parsing
 import 'package:http/http.dart' as http;
 
 import '../../auth/saved_login/user_session.dart';
-
+import '../../main.dart';
 
 class DonationScreen extends StatefulWidget {
   const DonationScreen({super.key});
@@ -71,7 +71,7 @@ class _DonationScreenState extends State<DonationScreen> {
       "return_type": "GET",
       "cancel_url": "${baseURL}cancel.php",
       "webhook_url":
-      "https://pay.climaxitbd.com/callback/ae673c586c0a56ce5c10a304bd1c26e0cd87d120"
+          "https://pay.climaxitbd.com/callback/ae673c586c0a56ce5c10a304bd1c26e0cd87d120"
     };
 
     try {
@@ -91,8 +91,9 @@ class _DonationScreenState extends State<DonationScreen> {
           context,
           MaterialPageRoute(
               builder: (context) => DonationPay(
-                paymentUrl: data['payment_url'], amount: _amountController.text,
-              )),
+                    paymentUrl: data['payment_url'],
+                    amount: _amountController.text,
+                  )),
         );
       } else {
         print("Error: ${response.body}");
@@ -104,7 +105,7 @@ class _DonationScreenState extends State<DonationScreen> {
 
   Future<void> fetchDonationData() async {
     final url =
-    Uri.parse('https://climaxitbd.com/php/donation/get_donate_persons.php');
+        Uri.parse('https://climaxitbd.com/php/donation/get_donate_persons.php');
 
     try {
       final response = await http.get(url);
@@ -130,7 +131,8 @@ class _DonationScreenState extends State<DonationScreen> {
       createCheckout(
         fullName: name,
         email: email,
-        amount: amount, // Send dynamic amount
+        amount: amount,
+        // Send dynamic amount
         userId: userId,
         orderId: '', // Optionally, you can provide an orderId
       );
@@ -188,7 +190,8 @@ class _DonationScreenState extends State<DonationScreen> {
                   children: imageLinks.map((link) {
                     return Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 5.0),
-                      child: ClipRRect(child: Image.network(link, fit: BoxFit.cover)),
+                      child: ClipRRect(
+                          child: Image.network(link, fit: BoxFit.cover)),
                     );
                   }).toList(),
                 ),
@@ -209,7 +212,21 @@ class _DonationScreenState extends State<DonationScreen> {
               SizedBox(
                 width: double.maxFinite,
                 child: ElevatedButton(
-                  onPressed: _handleDonation,
+                  onPressed: () {
+                    if (verificationService.isVerified) {
+                      _handleDonation();
+                    } else {
+                      SnackBar(
+                        content: Text(
+                          "আপনার একাউন্ট ভেরিফাইড নয়। একাউট ভেরিফাই করুন । ধন্যবাদ",
+                          style: TextStyle(color: Colors.white), // Text color
+                        ),
+                        backgroundColor: Colors.red, // Red background color
+                        duration:
+                            Duration(seconds: 3), // Duration for visibility
+                      );
+                    }
+                  },
                   child: const Text(
                     'Help',
                     style: TextStyle(color: Colors.white),

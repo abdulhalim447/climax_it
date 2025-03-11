@@ -3,6 +3,7 @@ import 'package:climax_it_user_app/screens/shoping/product.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import '../../slider/home_screen_slider.dart';
 import 'ProductItem.dart';
 import 'all_products.dart';
 
@@ -89,6 +90,10 @@ class _ShoppingScreenState extends State<ShoppingScreen> {
       body: Column(
         children: [
           // Search TextField
+          Padding(
+            padding: const EdgeInsets.only(top: 8.0),
+            child: HomeBannerSlider(),
+          ),
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: TextField(

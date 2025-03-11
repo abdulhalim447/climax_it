@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import 'package:climax_it_user_app/auth/base_url/wallet_balances/save_wallet_balances.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
@@ -62,8 +61,6 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
       final response = await http.get(Uri.parse(
           "https://climaxitbd.com/php/wallet/check_user_verify.php?user_id=$userId"));
 
-      print("Verification Response Status: ${response.statusCode}");
-      print("Verification Response Body: ${response.body}");
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
@@ -79,13 +76,11 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
 
         print("Verification Status: $isVerified");
       } else {
-        //print("Failed to fetch verification status: ${response.statusCode}");
         setState(() {
           isVerified = false; // Default to false on error
         });
       }
     } catch (e) {
-      //print("Error checking verification: $e");
       setState(() {
         isVerified = false; // Default to false on error
       });

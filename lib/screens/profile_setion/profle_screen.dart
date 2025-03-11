@@ -33,6 +33,7 @@ class _ProfilePageState extends State<ProfilePage> {
           profileData = json.decode(response.body);
           isLoading = false;
         });
+
       } else {
         setState(() {
           isLoading = false;
@@ -68,7 +69,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     sex: profileData['sex'] ?? '',
                     address: profileData['address'] ?? '',
                     country: profileData['country'] ?? '',
-                    profilePic: profileData['profile_pic'] ?? '',
+                    profilePic: "https://climaxitbd.com/php/profile/"+profileData['profile_pic'] ?? '',
                   ),
                 ),
               );
@@ -88,9 +89,8 @@ class _ProfilePageState extends State<ProfilePage> {
                         children: [
                           CircleAvatar(
                             radius: 40,
-                            backgroundImage: NetworkImage(
-                                profileData['profile_pic'] ??
-                                    'N/A'), // Add your image asset here
+                            backgroundImage: NetworkImage("https://climaxitbd.com/php/profile/"+
+                                profileData['profile_pic']), // Add your image asset here
                           ),
                           const SizedBox(height: 8),
                           Text(

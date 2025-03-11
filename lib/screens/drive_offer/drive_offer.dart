@@ -1,7 +1,11 @@
 import 'package:climax_it_user_app/screens/drive_offer/request_offer.dart';
+import 'package:climax_it_user_app/slider/drive_slider.dart';
+import 'package:climax_it_user_app/slider/home_screen_slider.dart';
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+
+import '../../main.dart';
 
 class DriveOfferScreen extends StatefulWidget {
   @override
@@ -19,6 +23,7 @@ class _DriveOfferScreenState extends State<DriveOfferScreen> {
     {'id': 3, 'name': 'বাংলালিংক', 'logo': 'assets/icons/banglalink.png'},
     {'id': 4, 'name': 'গ্রামীণ', 'logo': 'assets/icons/gp.png'},
     {'id': 5, 'name': 'টেলিটক', 'logo': 'assets/icons/teletalk.png'},
+    {'id': 6, 'name': 'স্কিটো', 'logo': 'assets/icons/skitto.png'},
   ];
 
   final categories = [
@@ -61,42 +66,56 @@ class _DriveOfferScreenState extends State<DriveOfferScreen> {
       body: Column(
         children: [
           SizedBox(height: 10),
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: operators.map((operator) {
-                return GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      operatorId = operator['id'] as int?;
-                      fetchOffers();
-                    });
-                  },
-                  child: Container(
-                    margin: EdgeInsets.symmetric(horizontal: 5),
-                    padding: EdgeInsets.all(3),  // কিছু স্পেস দিয়ে দেওয়া হলো
-                    decoration: BoxDecoration(
-                      color: operatorId == operator['id'] ? Colors.blue : Colors.grey[300],
-                      borderRadius: BorderRadius.circular(5),
-                      border: Border.all(
-                        color: operatorId == operator['id'] ? Colors.red : Colors.transparent,
-                        width: 1, // বর্ডারের পুরুত্ব
-                      ),
-                    ),
-                    child: Image.asset(
-                      operator['logo'] as String,
-                      width: 50,
-                      height: 50,
-                      fit: BoxFit.contain,
-                    ),
-                  ),
-                );
-              }).toList(),
-            ),
-          ),
-
+          DriveSlider(),
           SizedBox(height: 10),
+          Column(
+            children: [
+              for (var i = 0; i < operators.length; i += 3)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 10),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      for (var j = i; j < i + 3 && j < operators.length; j++)
+                        GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              operatorId = operators[j]['id'] as int?;
+                              fetchOffers();
+                            });
+                          },
+                          child: Container(
+                            margin: EdgeInsets.symmetric(horizontal: 5),
+                            padding: EdgeInsets.all(3),
+                            decoration: BoxDecoration(
+                              color: operatorId == operators[j]['id']
+                                  ? Colors.blue
+                                  : Colors.grey[300],
+                              borderRadius: BorderRadius.circular(5),
+                              border: Border.all(
+                                color: operatorId == operators[j]['id']
+                                    ? Colors.red
+                                    : Colors.transparent,
+                                width: 1,
+                              ),
+                            ),
+                            child: Image.asset(
+                              operators[j]['logo'] as String,
+                              width: 50,
+                              height: 50,
+                              fit: BoxFit.contain,
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+            ],
+          ),
+          SizedBox(height: 10),
+
+
+
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: Row(
@@ -134,52 +153,52 @@ class _DriveOfferScreenState extends State<DriveOfferScreen> {
           Expanded(
               child: offers.isEmpty
                   ? Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Text(
-                        'প্রথমে একটি সিম অফারেটর ও একটি অফার ক্যাটাগরি সিলেক্ট করুন'),
-                  ))
+                      child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Text(
+                          'প্রথমে একটি সিম অফারেটর ও একটি অফার ক্যাটাগরি সিলেক্ট করুন'),
+                    ))
                   : ListView.builder(
-                itemCount: offers.length,
-                itemBuilder: (context, index) {
-                  final offer = offers[index];
+                      itemCount: offers.length,
+                      itemBuilder: (context, index) {
+                        final offer = offers[index];
 
-                  // Find the operator's logo based on the selected operatorId
-                  final operator = operators.firstWhere(
-                        (op) => op['id'] == operatorId,
-                    orElse: () => {'logo': ''}, // Fallback logo
-                  );
+                        // Find the operator's logo based on the selected operatorId
+                        final operator = operators.firstWhere(
+                          (op) => op['id'] == operatorId,
+                          orElse: () => {'logo': ''}, // Fallback logo
+                        );
 
-                  return Card(
-                    margin:
-                    EdgeInsets.symmetric(vertical: 5, horizontal: 10),
-                    child: ListTile(
-                      leading: Image.asset(
-                        operator['logo'] as String,
-                        width: 40,
-                        height: 40,
-                        fit: BoxFit.contain,
-                      ),
-                      title: Text(offer['title']),
-                      subtitle: Text(
-                          '${offer['description']} । \nপ্রাইস: ${offer['price']} টাকা'),
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => RequestDriveOffer(
-                              id: offer['id'],
-                              title: offer['title'],
-                              description: offer['description'],
-                              price: offer['price'].toString(),
+                        return Card(
+                          margin:
+                              EdgeInsets.symmetric(vertical: 5, horizontal: 10),
+                          child: ListTile(
+                            leading: Image.asset(
+                              operator['logo'] as String,
+                              width: 30,
+                              height: 30,
+                              fit: BoxFit.contain,
                             ),
+                            title: Text(offer['title']),
+                            subtitle: Text(
+                                '${offer['description']} । \nপ্রাইস: ${offer['price']} টাকা'),
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => RequestDriveOffer(
+                                    id: offer['id'],
+                                    title: offer['title'],
+                                    description: offer['description'],
+                                    price: offer['price'].toString(),
+                                  ),
+                                ),
+                              );
+                            },
                           ),
                         );
                       },
-                    ),
-                  );
-                },
-              ))
+                    ))
         ],
       ),
     );

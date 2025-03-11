@@ -1,14 +1,15 @@
 import 'dart:convert';
-
+import 'package:climax_it_user_app/main.dart';
 import 'package:climax_it_user_app/screens/app_download/app_download.dart';
 import 'package:climax_it_user_app/screens/micro_job/show_job_grid.dart';
 import 'package:climax_it_user_app/screens/order_history/order_history.dart';
+import 'package:climax_it_user_app/screens/support/live_support.dart';
 import 'package:climax_it_user_app/screens/wallet_section/wallet_screen/withdraw_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:http/http.dart' as http;
-
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../auth/saved_login/user_session.dart';
 import '../../slider/home_screen_slider.dart';
 import '../../widgets/web_view.dart';
@@ -28,20 +29,18 @@ class HomePage extends StatefulWidget {
   State<HomePage> createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> {
-  bool isVerified = false;
-  String userId = "";
-  String name = "";
-  String email = "";
+String userId = "";
+String name = "";
+String email = "";
 
+class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    _userInfo().then((_) {
-      if (userId.isNotEmpty) {
-        _checkUserVerification(); // Only check verification after userId is set
-      }
-    });
+
+    _userInfo();
+    _showWelcomeDialog(); // Show welcome dialog if applicable
+    _showFacebookGroupDialog();
   }
 
   Future<void> _userInfo() async {
@@ -50,57 +49,86 @@ class _HomePageState extends State<HomePage> {
       String? fetchedEmail = await UserSession.getEmail();
       String? fetchedName = await UserSession.getName();
 
-      // Null চেক করে UI আপডেট করো
       if (fetchedUserId != null &&
           fetchedEmail != null &&
           fetchedName != null) {
-        setState(() {
-          userId = fetchedUserId;
-          email = fetchedEmail;
-          name = fetchedName;
-        });
-
-        //print("User ID: $userId, Email: $email, Name: $name");
-      } else {
-        //print("User data is null");
+        userId = fetchedUserId;
+        email = fetchedEmail;
+        name = fetchedName;
       }
     } catch (e) {
-      //print("Error fetching user info: $e");
+      print("Error fetching user info: $e");
     }
   }
 
-  Future<void> _checkUserVerification() async {
-    try {
-      final response = await http.get(Uri.parse(
-          "https://climaxitbd.com/php/wallet/check_user_verify.php?user_id=$userId"));
+  Future<void> _showWelcomeDialog() async {
+    final prefs = await SharedPreferences.getInstance();
+    final lastShownDate = prefs.getString('last_welcome_dialog_date');
+    final today = DateTime.now()
+        .toIso8601String()
+        .split('T')[0]; // Get current date in YYYY-MM-DD format
 
-      print("Verification Response Status: ${response.statusCode}");
-      print("Verification Response Body: ${response.body}");
+    if (lastShownDate != today) {
+      // Show the dialog
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('😊 স্বাগতম!'),
+            content: Text('আপনাকে পেয়ে আমরা আনন্দিত। উপভোগ করুন! ধন্যবাদ। '),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: Text('OK'),
+              ),
+            ],
+          );
+        },
+      );
 
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
+      // Update the last shown date
+      await prefs.setString('last_welcome_dialog_date', today);
+    }
+  }
 
-        // Make sure we're checking the exact value and type
-        setState(() {
-          // Convert to int first to ensure proper comparison
-          int verificationStatus = data["isVarified"] is String
-              ? int.parse(data["isVarified"])
-              : data["isVarified"];
-          isVerified = verificationStatus == 1;
-        });
+  Future<void> _showFacebookGroupDialog() async {
+    final prefs = await SharedPreferences.getInstance();
+    final hasSeenDialog =
+        prefs.getBool('has_seen_facebook_group_dialog') ?? false;
 
-        //print("Verification Status: $isVerified");
-      } else {
-        //print("Failed to fetch verification status: ${response.statusCode}");
-        setState(() {
-          isVerified = false; // Default to false on error
-        });
-      }
-    } catch (e) {
-      //print("Error checking verification: $e");
-      setState(() {
-        isVerified = false; // Default to false on error
-      });
+    if (!hasSeenDialog) {
+      // Show the dialog
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('👥আমাদের ফেসবুক গ্রুপে যোগ দিন!'),
+            content: Text(
+                'আমাদের ফেসবুক গ্রুপে যোগদান করে আপডেট থাকুন এবং অন্যদের সাথে সংযুক্ত থাকুন।.'),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: Text('না'),
+              ),
+              TextButton(
+                onPressed: () {
+                  _launchURL(
+                      'https://www.facebook.com/climaxitbdofficial'); // Replace with your Facebook group link
+                  Navigator.of(context).pop();
+                },
+                child: Text('যোগ দিন'),
+              ),
+            ],
+          );
+        },
+      );
+
+      // Update the preference to indicate the dialog has been shown
+      await prefs.setBool('has_seen_facebook_group_dialog', true);
     }
   }
 
@@ -116,7 +144,10 @@ class _HomePageState extends State<HomePage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            HomeBannerSlider(),
+            Padding(
+              padding: const EdgeInsets.only(top: 8.0),
+              child: HomeBannerSlider(),
+            ),
             _idVerificationSection(),
             // সার্ভিস সমূহ
             _buildSectionTitle('সার্ভিস সমূহ'),
@@ -126,6 +157,14 @@ class _HomePageState extends State<HomePage> {
             _buildUpcomingFeatureGrid(),
           ],
         ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        shape: CircleBorder(),
+        onPressed: () {
+          Navigator.push(context, MaterialPageRoute(builder: (context)=>LiveSupport()));
+        },
+        tooltip: 'Increament',
+        child: const Icon(Icons.support_agent),
       ),
     );
   }
@@ -142,7 +181,8 @@ class _HomePageState extends State<HomePage> {
         IconButton(
           icon: const Icon(Icons.notifications),
           onPressed: () {
-            Navigator.push(context, MaterialPageRoute(builder: (context)=>NotificationScreen()));
+            Navigator.push(context,
+                MaterialPageRoute(builder: (context) => NotificationScreen()));
           },
         ),
 
@@ -170,6 +210,7 @@ class _HomePageState extends State<HomePage> {
               future: Future.wait([
                 UserSession.getName(),
                 UserSession.getReferCode(),
+                UserSession.getProfilePic(),
               ]),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
@@ -185,6 +226,7 @@ class _HomePageState extends State<HomePage> {
                   final data = snapshot.data as List<String?>;
                   final name = data[0] ?? "No Name";
                   final referCode = data[1] ?? "No Refer Code";
+                  final profilepic = data[2] ?? "No Refer Code";
 
                   return Padding(
                     padding: const EdgeInsets.only(left: 16.0),
@@ -194,12 +236,12 @@ class _HomePageState extends State<HomePage> {
                         CircleAvatar(
                           radius: 40,
                           backgroundImage: NetworkImage(
-                            'https://via.placeholder.com/150',
+                            'https://climaxitbd.com/php/profile/' + profilepic,
                           ),
                         ),
                         SizedBox(height: 8),
                         Text(
-                          name,
+                          name + (verificationService.isVerified ? ' *️⃣' : ''),
                           style: TextStyle(
                             color: Colors.white,
                             fontSize: 14,
@@ -254,18 +296,8 @@ class _HomePageState extends State<HomePage> {
             leading: const Icon(Icons.video_camera_front_outlined),
             title: const Text(' আমার ক্লাস'),
             onTap: () {
-              if (isVerified) {
-                Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => VideoListScreen()));
-              } else {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text("আপনার একাউন্টটি ভেরিফাই করুন!"),
-                    duration: Duration(seconds: 2),
-                    backgroundColor: Colors.red,
-                  ),
-                );
-              }
+              Navigator.push(context,
+                  MaterialPageRoute(builder: (context) => VideoListScreen()));
             },
           ),
 
@@ -273,19 +305,9 @@ class _HomePageState extends State<HomePage> {
             leading: const Icon(Icons.history),
             title: const Text('অর্ডার হিস্টোরি'),
             onTap: () {
-              if (isVerified) {
-                Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => OrderHistory()));
-                print('Order History clicked!');
-              } else {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text("আপনার একাউন্টটি ভেরিফাই করুন!"),
-                    duration: Duration(seconds: 2),
-                    backgroundColor: Colors.red,
-                  ),
-                );
-              }
+              Navigator.push(context,
+                  MaterialPageRoute(builder: (context) => OrderHistory()));
+              print('Order History clicked!');
             },
           ),
 
@@ -293,18 +315,8 @@ class _HomePageState extends State<HomePage> {
             leading: const Icon(Icons.account_balance_wallet),
             title: const Text('উইথড্র'),
             onTap: () {
-              if (isVerified) {
-                Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => WithdrawScreen()));
-              } else {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text("আপনার একাউন্টটি ভেরিফাই করুন!"),
-                    duration: Duration(seconds: 2),
-                    backgroundColor: Colors.red,
-                  ),
-                );
-              }
+              Navigator.push(context,
+                  MaterialPageRoute(builder: (context) => WithdrawScreen()));
             },
           ),
 
@@ -514,7 +526,7 @@ class _HomePageState extends State<HomePage> {
 //=============================================================================
   Widget _idVerificationSection() {
     // If verified, return an empty container (invisible)
-    if (isVerified) {
+    if (verificationService.isVerified) {
       return const SizedBox.shrink();
     }
 
@@ -550,7 +562,7 @@ class _HomePageState extends State<HomePage> {
                 createCheckout(
                     fullName: name!,
                     email: email!,
-                    amount: '10',
+                    amount: '500',
                     userId: userId!,
                     orderId: '');
               },
@@ -619,28 +631,18 @@ class _HomePageState extends State<HomePage> {
         itemBuilder: (context, index) {
           final item = services[index];
           return GestureDetector(
-            onTap: isVerified
-                ? () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => screens[index]),
-                    );
-                  }
-                : () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text("আপনার একাউন্টটি ভেরিফাই করুন!"),
-                        duration: Duration(seconds: 2),
-                        backgroundColor: Colors.red,
-                      ),
-                    );
-                  },
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => screens[index]),
+              );
+            },
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 CircleAvatar(
                   radius: 24,
-                  backgroundColor: isVerified ? Colors.blue : Colors.grey,
+                  backgroundColor: Colors.blue,
                   child: Image.asset(
                     item["icon"] ?? "",
                     width: 30,
@@ -694,7 +696,7 @@ class _HomePageState extends State<HomePage> {
             children: [
               CircleAvatar(
                 radius: 24,
-                backgroundColor: isVerified ? Colors.blue : Colors.grey,
+                backgroundColor: Colors.blue,
                 child: Text(
                   item["icon"] ?? "",
                   style: const TextStyle(fontSize: 20),
@@ -713,24 +715,27 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-// Slider Scetion
-
   Future<void> _launchURL(String url) async {
-    if (await canLaunch(url)) {
-      await launch(url);
+    final Uri uri = Uri.parse(url); // Ensure it's a valid URL format.
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri);
     } else {
-      throw 'Could not launch $url';
+      // If it's a web URL, fallback to opening in browser
+      await launchUrl(Uri.parse('https://www.google.com/search?q=$url'));
     }
   }
-}
 
-void _logout(BuildContext context) async {
-  await UserSession.clearSession();
+  void _logout(BuildContext context) async {
+    await UserSession.clearSession();
 
-  // Navigate to the login screen and remove all previous screens from stack
-  Navigator.pushAndRemoveUntil(
-    context,
-    MaterialPageRoute(builder: (context) => LoginScreen()),
-    (Route<dynamic> route) => false,
-  );
+    // Navigate to the login screen and remove all previous screens from stack
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (context) => LoginScreen()),
+      (Route<dynamic> route) => false,
+    );
+  }
+
+
+
 }

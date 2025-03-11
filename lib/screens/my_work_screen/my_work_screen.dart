@@ -1,8 +1,24 @@
 import 'package:climax_it_user_app/screens/my_work_screen/task_screen.dart';
 import 'package:flutter/material.dart';
+import '../../auth/verification/verification_service.dart';
 
-class MyWorkScreen extends StatelessWidget {
+import '../../main.dart';
+
+class MyWorkScreen extends StatefulWidget {
   const MyWorkScreen({super.key});
+
+  @override
+  _MyWorkScreenState createState() => _MyWorkScreenState();
+}
+
+class _MyWorkScreenState extends State<MyWorkScreen> {
+  final VerificationService verificationService = VerificationService();
+
+  @override
+  void initState() {
+    super.initState();
+    verificationService.initialize();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -43,8 +59,11 @@ class MyWorkScreen extends StatelessWidget {
                 width: double.maxFinite,
                 child: ElevatedButton(
                   onPressed: () {
-                    Navigator.push(context,
-                        MaterialPageRoute(builder: (context) => TaskScreen()));
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => TaskScreen()));
+                    
                   },
                   child: Text(
                     "আমার কাজ",

@@ -4,14 +4,14 @@ import 'package:carousel_slider/carousel_slider.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
-class HomeBannerSlider extends StatefulWidget {
-  const HomeBannerSlider({super.key});
+class DriveSlider extends StatefulWidget {
+  const DriveSlider({super.key});
 
   @override
-  State<HomeBannerSlider> createState() => _HomeBannerSliderState();
+  State<DriveSlider> createState() => _DriveSliderState();
 }
 
-class _HomeBannerSliderState extends State<HomeBannerSlider> {
+class _DriveSliderState extends State<DriveSlider> {
   final ValueNotifier<int> _selectedIndex = ValueNotifier(0);
   List<String> _imageUrls = [];
   bool _isLoading = true;
@@ -40,7 +40,7 @@ class _HomeBannerSliderState extends State<HomeBannerSlider> {
   Future<void> _fetchImages() async {
     try {
       final response = await http.get(
-        Uri.parse('https://climaxitbd.com/php/sliders/sliders.php'),
+        Uri.parse('https://climaxitbd.com/php/sliders/drive_sliders.php'),
       );
 
       if (response.statusCode == 200) {

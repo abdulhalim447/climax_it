@@ -2,9 +2,16 @@ import 'package:climax_it_user_app/screens/splash_screen/splash_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_downloader/flutter_downloader.dart';
 
+import 'auth/verification/verification_service.dart';
+
+final VerificationService verificationService = VerificationService();
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   //await WalletService.fetchWalletBalance();
+
+  // Wait for the verification process
+  await verificationService.initialize();
   await FlutterDownloader.initialize(); // Initialize flutter_downloader
   runApp(MyApp());
 }

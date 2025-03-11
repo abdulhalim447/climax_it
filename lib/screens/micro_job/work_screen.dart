@@ -2,6 +2,8 @@ import 'package:climax_it_user_app/screens/micro_job/submit_proof.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../main.dart';
+
 class MicroWorkScreen extends StatelessWidget {
   final Map<String, dynamic> item;
 
@@ -25,7 +27,7 @@ class MicroWorkScreen extends StatelessWidget {
                 children: [
                   Text(item['price'] + 'tk'),
                   Text(item['task_id']),
-                  Text('744/900'),
+                  Text('0/0'),
                 ],
               ),
               SizedBox(height: 10),
@@ -50,10 +52,21 @@ class MicroWorkScreen extends StatelessWidget {
                 width: double.maxFinite,
                 child: ElevatedButton(
                   onPressed: () async {
-                    if (await canLaunch(item['work_link'])) {
-                      await launch(item['work_link']);
+                    if (verificationService.isVerified) {
+                      if (await canLaunch(item['work_link'])) {
+                        await launch(item['work_link']);
+                      } else {
+                        throw 'Could not launch ${item['work_link']}';
+                      }
                     } else {
-                      throw 'Could not launch ${item['work_link']}';
+                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                        content: Text(
+                          "আপনার একাউন্ট ভেরিফাইড নয়। একাউট ভেরিফাই করুন । ধন্যবাদ",
+                          style: TextStyle(color: Colors.white),
+                        ),
+                        backgroundColor: Colors.red,
+                        duration: Duration(seconds: 3),
+                      ));
                     }
                   },
                   style: ElevatedButton.styleFrom(backgroundColor: Colors.blue),
@@ -70,11 +83,22 @@ class MicroWorkScreen extends StatelessWidget {
                 width: double.maxFinite,
                 child: ElevatedButton(
                   onPressed: () {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) =>
-                                ImageUploadScreen(taskID: item['task_id'])));
+                    if (verificationService.isVerified) {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) =>
+                                  ImageUploadScreen(taskID: item['task_id'])));
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                        content: Text(
+                          "আপনার একাউন্ট ভেরিফাইড নয়। একাউট ভেরিফাই করুন । ধন্যবাদ",
+                          style: TextStyle(color: Colors.white),
+                        ),
+                        backgroundColor: Colors.red,
+                        duration: Duration(seconds: 3),
+                      ));
+                    }
                   },
                   style: ElevatedButton.styleFrom(backgroundColor: Colors.blue),
                   child: Text('প্রুফ সাবমিট করুন',

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../main.dart';
 import 'course_details_page.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -81,12 +82,27 @@ class _VideoListScreenState extends State<VideoListScreen> {
                 return GestureDetector(
                   onTap: () {
                     // Navigate to a different page when clicked
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => VideoDetailPage(videoLink: video.videoLink),
-                      ),
-                    );
+
+                    if(verificationService.isVerified){
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => VideoDetailPage(videoLink: video.videoLink),
+                        ),
+                      );
+
+                    }else{
+                      SnackBar(
+                        content: Text(
+                          "আপনার একাউন্ট ভেরিফাইড নয়। একাউট ভেরিফাই করুন । ধন্যবাদ",
+                          style: TextStyle(color: Colors.white), // Text color
+                        ),
+                        backgroundColor: Colors.red, // Red background color
+                        duration: Duration(seconds: 3), // Duration for visibility
+                      );
+                    }
+
+
                   },
                   child: Padding(
                     padding: const EdgeInsets.only(left: 16.0, right: 16),

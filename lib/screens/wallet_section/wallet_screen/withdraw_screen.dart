@@ -12,6 +12,8 @@ class WithdrawScreen extends StatefulWidget {
 
 class _WithdrawScreenState extends State<WithdrawScreen> {
   final TextEditingController _amountController = TextEditingController();
+  final TextEditingController _withdraw_numberController =
+      TextEditingController();
   double calculatedAmount = 0; // After deducting charge
   String? selectedPaymentMethod;
   bool isLoading = false; // To show loading state
@@ -38,7 +40,9 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
 
   Future<void> _submitWithdraw() async {
     final String? userId = await UserSession.getUserID();
-    if (_amountController.text.isEmpty || selectedPaymentMethod == null) {
+    if (_amountController.text.isEmpty ||
+        _withdraw_numberController.text.isEmpty ||
+        selectedPaymentMethod == null) {
       _showMessage("সব তথ্য প্রদান করুন", isError: true);
       return;
     }
@@ -53,14 +57,16 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
       isLoading = true;
     });
 
-    var url = Uri.parse("https://climaxitbd.com/php/withdraw/withdraw.php"); // Change to your API URL
+    var url = Uri.parse(
+        "https://climaxitbd.com/php/withdraw/withdraw.php"); // Change to your API URL
     var response = await http.post(
       url,
       headers: {"Content-Type": "application/json"},
       body: jsonEncode({
         "user_id": userId,
         "amount": amount.toStringAsFixed(2),
-        "pay_method": selectedPaymentMethod
+        "pay_method": selectedPaymentMethod,
+        "withdraw_number": _withdraw_numberController.text.toString(),
       }),
     );
 
@@ -72,6 +78,7 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
       var responseData = jsonDecode(response.body);
       if (responseData['status'] == "success") {
         _showMessage("উইথড্র সফল হয়েছে", isError: false);
+        _withdraw_numberController.clear();
         _amountController.clear();
         setState(() {
           selectedPaymentMethod = null;
@@ -99,65 +106,73 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
       appBar: AppBar(title: const Text('উইথড্র')),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            TextField(
-              controller: _amountController,
-              decoration: const InputDecoration(
-                labelText: 'টাকার পরিমাণ',
-                border: OutlineInputBorder(),
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              TextField(
+                controller: _withdraw_numberController,
+                decoration: const InputDecoration(
+                  labelText: 'পেমেন্ট নাম্বার',
+                  border: OutlineInputBorder(),
+                ),
+                keyboardType: TextInputType.number,
               ),
-              keyboardType: TextInputType.number,
-            ),
-            const SizedBox(height: 16),
-
-            Text(
-              'আপনি পাবেন ${calculatedAmount.toStringAsFixed(2)} Tk',
-              style: const TextStyle(fontSize: 16),
-            ),
-            const SizedBox(height: 16),
-
-            DropdownButtonFormField<String>(
-              decoration: const InputDecoration(
-                labelText: 'পেমেন্ট মেথড',
-                border: OutlineInputBorder(),
+              SizedBox(height: 10),
+              TextField(
+                controller: _amountController,
+                decoration: const InputDecoration(
+                  labelText: 'টাকার পরিমাণ',
+                  border: OutlineInputBorder(),
+                ),
+                keyboardType: TextInputType.number,
               ),
-              items: <String>['বিকাশ', 'নগদ', 'উপায়']
-                  .map<DropdownMenuItem<String>>((String value) {
-                return DropdownMenuItem<String>(
-                  value: value,
-                  child: Text(value),
-                );
-              }).toList(),
-              onChanged: (String? newValue) {
-                setState(() {
-                  selectedPaymentMethod = newValue;
-                });
-              },
-              value: selectedPaymentMethod,
-            ),
-            const SizedBox(height: 16),
-
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: isLoading ? null : _submitWithdraw,
-                child: isLoading
-                    ? const CircularProgressIndicator(color: Colors.white)
-                    : const Text('উইথড্র', style: TextStyle(color: Colors.white)),
-                style: ElevatedButton.styleFrom(
-                  minimumSize: const Size(double.infinity, 50),
+              const SizedBox(height: 16),
+              Text(
+                'আপনি পাবেন ${calculatedAmount.toStringAsFixed(2)} Tk',
+                style: const TextStyle(fontSize: 16),
+              ),
+              const SizedBox(height: 16),
+              DropdownButtonFormField<String>(
+                decoration: const InputDecoration(
+                  labelText: 'পেমেন্ট মেথড',
+                  border: OutlineInputBorder(),
+                ),
+                items: <String>['বিকাশ', 'নগদ', 'উপায়']
+                    .map<DropdownMenuItem<String>>((String value) {
+                  return DropdownMenuItem<String>(
+                    value: value,
+                    child: Text(value),
+                  );
+                }).toList(),
+                onChanged: (String? newValue) {
+                  setState(() {
+                    selectedPaymentMethod = newValue;
+                  });
+                },
+                value: selectedPaymentMethod,
+              ),
+              const SizedBox(height: 16),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: isLoading ? null : _submitWithdraw,
+                  child: isLoading
+                      ? const CircularProgressIndicator(color: Colors.white)
+                      : const Text('উইথড্র',
+                          style: TextStyle(color: Colors.white)),
+                  style: ElevatedButton.styleFrom(
+                    minimumSize: const Size(double.infinity, 50),
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(height: 16),
-
-            const Text(
-              'পেমেন্ট রিকোয়েস্ট দেওয়ার ২৪ থেকে ৪৮ ঘণ্টার মধ্যে পেমেন্ট করা হবে। সর্বনিম্ন ২৫০ টাকা উইথড্র দিতে পারবেন এবং উইথড্র দেওয়ার সময় ২% চার্জ কেটে নেওয়া হবে, ধন্যবাদ।',
-              style: TextStyle(color: Colors.red),
-            ),
-          ],
+              const SizedBox(height: 16),
+              const Text(
+                'পেমেন্ট রিকোয়েস্ট দেওয়ার ২৪ থেকে ৪৮ ঘণ্টার মধ্যে পেমেন্ট করা হবে। সর্বনিম্ন ২৫০ টাকা উইথড্র দিতে পারবেন এবং উইথড্র দেওয়ার সময় ২% চার্জ কেটে নেওয়া হবে, ধন্যবাদ।',
+                style: TextStyle(color: Colors.red),
+              ),
+            ],
+          ),
         ),
       ),
     );

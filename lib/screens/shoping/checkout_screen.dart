@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:climax_it_user_app/screens/shoping/product.dart';
 import '../../auth/saved_login/user_session.dart';
+import '../../main.dart';
 
 class CheckoutScreen extends StatefulWidget {
   final Product product;
@@ -1009,7 +1010,26 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       bottomNavigationBar: Padding(
         padding: const EdgeInsets.all(16),
         child: ElevatedButton(
-          onPressed: _isLoading ? null : _deductBalance,
+          onPressed: _isLoading
+              ? null
+              : () {
+            if (verificationService.isVerified) {
+              // Your existing logic for button press
+              _deductBalance();
+            } else {
+              // Show SnackBar if the account is not verified
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(
+                    "আপনার একাউন্ট ভেরিফাইড নয়। একাউট ভেরিফাই করুন । ধন্যবাদ",
+                    style: TextStyle(color: Colors.white), // Text color
+                  ),
+                  backgroundColor: Colors.red, // Red background color
+                  duration: Duration(seconds: 3), // Duration for visibility
+                ),
+              );
+            }
+          },
           style: ElevatedButton.styleFrom(
             padding: const EdgeInsets.symmetric(vertical: 16),
             shape: RoundedRectangleBorder(

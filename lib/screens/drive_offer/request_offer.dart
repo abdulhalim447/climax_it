@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 import '../../auth/saved_login/user_session.dart';
+import '../../main.dart';
 
 class RequestDriveOffer extends StatefulWidget {
   final int id;
@@ -158,109 +159,127 @@ class _RequestDriveOfferState extends State<RequestDriveOffer> {
       appBar: AppBar(
         title: Text("ড্রাইভ অফার কিনুন"),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Display Shopping Wallet Balance
-            Center(
-              child: Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(8),
-                  color: Colors.blue,
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Text(
-                    'শপিং ব্যালেন্স: $shoppingWalletBalance টাকা',
-                    style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white),
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Display Shopping Wallet Balance
+              Center(
+                child: Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(8),
+                    color: Colors.blue,
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Text(
+                      'শপিং ব্যালেন্স: $shoppingWalletBalance টাকা',
+                      style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white),
+                    ),
                   ),
                 ),
               ),
-            ),
-            SizedBox(height: 20),
-
-            Padding(
-              padding: const EdgeInsets.only(left: 8.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    "অফার: ${widget.title}",
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                  ),
-                  SizedBox(height: 10),
-                  Text(
-                    "বর্ণনা: ${widget.description}",
-                    style: TextStyle(fontSize: 16),
-                  ),
-                  SizedBox(height: 10),
-                  Text(
-                    "মূল্য: ${widget.price} টাকা",
-                    style: TextStyle(fontSize: 16),
-                  ),
-                ],
+              SizedBox(height: 20),
+        
+              Padding(
+                padding: const EdgeInsets.only(left: 8.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      "অফার: ${widget.title}",
+                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                    ),
+                    SizedBox(height: 10),
+                    Text(
+                      "বর্ণনা: ${widget.description}",
+                      style: TextStyle(fontSize: 16),
+                    ),
+                    SizedBox(height: 10),
+                    Text(
+                      "মূল্য: ${widget.price} টাকা",
+                      style: TextStyle(fontSize: 16),
+                    ),
+                  ],
+                ),
               ),
-            ),
-            SizedBox(height: 20),
-
-            // Name TextField
-            TextField(
-              controller: _offerNumberCoteroller,
-              keyboardType: TextInputType.number,
-              decoration: InputDecoration(
-                labelText: "অফার নাম্বার",
-                border: OutlineInputBorder(),
-
-              ),
-            ),
-            SizedBox(height: 20),
-
-            // Division Dropdown
-            DropdownButtonFormField<String>(
-              value: selectedDistrict,
-              items: districts.map((district) {
-                return DropdownMenuItem<String>(
-                  value: district,
-                  child: Text(district),
-                );
-              }).toList(),
-              onChanged: (value) {
-                setState(() {
-                  selectedDistrict = value;
-                });
-              },
-              decoration: InputDecoration(
+              SizedBox(height: 20),
+        
+              // Name TextField
+              TextField(
+                controller: _offerNumberCoteroller,
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(
+                  labelText: "অফার নাম্বার",
                   border: OutlineInputBorder(),
-                  labelText: "জেলা নির্বাচন করুন"),
-            ),
-            SizedBox(height: 20),
-
-            // Submit Button
-            Center(
-              child: SizedBox(
-                width: double.maxFinite,
-                child: ElevatedButton(
-                  onPressed:(){
-                    _submitDriveRequest();
-                    _deductBalance();
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue,
-                    padding: EdgeInsets.symmetric(horizontal: 50, vertical: 15),
-                  ),
-                  child: Text(
-                    "সাবমিট",
-                    style: TextStyle(fontSize: 16, color: Colors.white),
+        
+                ),
+              ),
+              SizedBox(height: 20),
+        
+              // Division Dropdown
+              DropdownButtonFormField<String>(
+                value: selectedDistrict,
+                items: districts.map((district) {
+                  return DropdownMenuItem<String>(
+                    value: district,
+                    child: Text(district),
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  setState(() {
+                    selectedDistrict = value;
+                  });
+                },
+                decoration: InputDecoration(
+                    border: OutlineInputBorder(),
+                    labelText: "জেলা নির্বাচন করুন"),
+              ),
+              SizedBox(height: 20),
+        
+              // Submit Button
+              Center(
+                child: SizedBox(
+                  width: double.maxFinite,
+                  child: ElevatedButton(
+                    onPressed:(){
+        
+                      if(verificationService.isVerified){
+        
+                        _submitDriveRequest();
+                        _deductBalance();
+        
+                      }else{
+                        SnackBar(
+                          content: Text(
+                            "আপনার একাউন্ট ভেরিফাইড নয়। একাউট ভেরিফাই করুন । ধন্যবাদ",
+                            style: TextStyle(color: Colors.white), // Text color
+                          ),
+                          backgroundColor: Colors.red, // Red background color
+                          duration: Duration(seconds: 3), // Duration for visibility
+                        );
+                      }
+        
+        
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blue,
+                      padding: EdgeInsets.symmetric(horizontal: 50, vertical: 15),
+                    ),
+                    child: Text(
+                      "সাবমিট",
+                      style: TextStyle(fontSize: 16, color: Colors.white),
+                    ),
                   ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

@@ -41,7 +41,7 @@ class _PaymentWebViewState extends State<PaymentWebView> {
 
       Map<String, dynamic> data = {
         'user_id': userID,
-        'shopping_wallet_balance': "10",
+        'shopping_wallet_balance': "0",
         'isVarified': "1",
       };
 

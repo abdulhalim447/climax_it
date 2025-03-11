@@ -6,6 +6,7 @@ import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'package:http/http.dart' as http;
 
+import '../../main.dart';
 
 class InstructionScreen extends StatefulWidget {
   final Map<String, dynamic> task;
@@ -18,8 +19,7 @@ class InstructionScreen extends StatefulWidget {
 
 class _InstructionScreenState extends State<InstructionScreen> {
   File? _selectedImage;
-
-
+  bool _isLoading = false;
 
   // Image picker function
   Future<void> _pickImage() async {
@@ -33,9 +33,7 @@ class _InstructionScreenState extends State<InstructionScreen> {
     }
   }
 
-
-
-  void _submitTask() async {
+  Future<void> _submitTask() async {
     final String? userID = await UserSession.getUserID();
 
     if (_selectedImage == null) {
@@ -48,76 +46,84 @@ class _InstructionScreenState extends State<InstructionScreen> {
     }
 
     // Prepare the data
-    String taskId = widget.task['id'] ?? 'N/A';
-    String? userId = userID; // Get user ID from wherever it's stored
-    String imageUrl = await _uploadImage(_selectedImage!); // Upload image and get URL
+    final taskId = widget.task['id']?.toString() ?? 'N/A';
+    String imageUrl = await _uploadImage(_selectedImage!);
 
     // Prepare the data to be sent to the server
     var data = {
       'task_id': taskId,
-      'user_id': userId,
+      'user_id': userID ?? 'N/A', // Fallback for null userID
       'screenshot': imageUrl,
     };
 
-    // Send data to the server (API call)
-    var response = await http.post(
-      Uri.parse('https://climaxitbd.com/php/my_work_section/admin/submitmywork.php'), // Replace with your actual API endpoint
-      body: data,
-    );
+    setState(() {
+      _isLoading = true;
+    });
 
-    if (response.statusCode == 200) {
+    try {
+      // Send data to the server (API call)
+      var response = await http.post(
+        Uri.parse(
+            'https://climaxitbd.com/php/my_work_section/admin/submitmywork.php'),
+        body: data,
+      );
+
+      if (response.statusCode == 200) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Task submitted successfully!"),
+          ),
+        );
+        setState(() {
+          _selectedImage = null;
+        });
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Failed to submit task."),
+          ),
+        );
+      }
+    } catch (e) {
+      print('Error submitting task: $e');
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text("Task submitted successfully!"),
+          content: Text("An error occurred while submitting the task."),
         ),
       );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Failed to submit task."),
-        ),
-      );
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
     }
   }
 
-
-
   Future<String> _uploadImage(File image) async {
     final String? userID = await UserSession.getUserID();
-    // API URL to upload the image
-    final Uri url = Uri.parse('https://climaxitbd.com/php/my_work_section/admin/submitmywork.php');
+    final Uri url = Uri.parse(
+        'https://climaxitbd.com/php/my_work_section/admin/submitmywork.php');
 
-    // Create a multipart request
     var request = http.MultipartRequest('POST', url);
-
-    // Attach the image to the request
     var imageFile = await http.MultipartFile.fromPath('screenshot', image.path);
     request.files.add(imageFile);
-
-    // Add any other necessary fields
-    request.fields['task_id'] = widget.task['id'] ?? 'N/A';
-    request.fields['user_id'] = userID!; // Replace with the actual user ID
+    request.fields['task_id'] = widget.task['id']?.toString() ?? 'N/A';
+    request.fields['user_id'] = userID ?? 'N/A';
 
     try {
-      // Send the request
       var response = await request.send();
 
-      // Check the response status
       if (response.statusCode == 200) {
-        // If the upload was successful, return the image URL
         final responseData = await response.stream.bytesToString();
         final data = jsonDecode(responseData);
-        return data['image_url']; // Adjust this based on your API response
+        return data['image_url'] ?? ''; // Return image URL if available
       } else {
         throw Exception('Failed to upload image');
       }
     } catch (e) {
       print('Error uploading image: $e');
-      return ''; // Return an empty string or handle error properly
+      return ''; // Return empty string if error occurs
     }
   }
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -229,7 +235,27 @@ class _InstructionScreenState extends State<InstructionScreen> {
                 child: SizedBox(
                   width: double.maxFinite,
                   child: ElevatedButton(
-                    onPressed: _submitTask,
+                    onPressed: _isLoading
+                        ? null
+                        : () {
+                            if (verificationService.isVerified) {
+                              _submitTask();
+                            } else {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    "আপনার একাউন্ট ভেরিফাইড নয়। একাউট ভেরিফাই করুন । ধন্যবাদ",
+                                    style: TextStyle(
+                                        color: Colors.white), // Text color
+                                  ),
+                                  backgroundColor:
+                                      Colors.red, // Red background color
+                                  duration: Duration(
+                                      seconds: 3), // Duration for visibility
+                                ),
+                              );
+                            }
+                          },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.blue,
                       padding: const EdgeInsets.symmetric(
@@ -238,10 +264,15 @@ class _InstructionScreenState extends State<InstructionScreen> {
                         borderRadius: BorderRadius.circular(8),
                       ),
                     ),
-                    child: const Text(
-                      "জমা দিন",
-                      style: TextStyle(fontSize: 16, color: Colors.white),
-                    ),
+                    child: _isLoading
+                        ? const CircularProgressIndicator(
+                            valueColor:
+                                AlwaysStoppedAnimation<Color>(Colors.white),
+                          )
+                        : const Text(
+                            "জমা দিন",
+                            style: TextStyle(fontSize: 16, color: Colors.white),
+                          ),
                   ),
                 ),
               ),
