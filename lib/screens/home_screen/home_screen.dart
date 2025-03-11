@@ -132,6 +132,13 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+
+
+
+
+// Main section of the screen================================================
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -160,14 +167,18 @@ class _HomePageState extends State<HomePage> {
       ),
       floatingActionButton: FloatingActionButton(
         shape: CircleBorder(),
+        backgroundColor: Colors.blue,
         onPressed: () {
           Navigator.push(context, MaterialPageRoute(builder: (context)=>LiveSupport()));
         },
         tooltip: 'Increament',
-        child: const Icon(Icons.support_agent),
+        child: const Icon(Icons.support_agent, color: Colors.white,size: 35,),
       ),
     );
   }
+
+
+  //=======================================================================
 
   AppBar _buildAppBar() {
     return AppBar(
@@ -625,8 +636,11 @@ class _HomePageState extends State<HomePage> {
         physics: const NeverScrollableScrollPhysics(),
         itemCount: services.length,
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 4,
-          childAspectRatio: 0.8,
+          crossAxisCount: 3,
+          //childAspectRatio: 0.8,
+          // mainAxisSpacing: 5,      // উপরে নিচে স্পেসিং কমানো
+          // crossAxisSpacing: 5,
+
         ),
         itemBuilder: (context, index) {
           final item = services[index];
@@ -666,17 +680,12 @@ class _HomePageState extends State<HomePage> {
   Widget _buildUpcomingFeatureGrid() {
     // উদাহরণস্বরূপ কিছু আসন্ন ফিচার আইটেম
     final List<Map<String, String>> upcomingFeatures = [
-      {"icon": "⬇️", "label": "মোবাইল রিচার্জ"},
-      {"icon": "📰", "label": "আর্টিকেল পড়ে ইনকাম"},
-      {"icon": "❓", "label": "কুইজ খেলে ইনকাম"},
-      {"icon": "🎬", "label": "ভিডিও দেখে ইনকাম"},
-      {"icon": "➕", "label": "অংক করে ইনকাম"},
-      {"icon": "💵", "label": "মাসিক বেতন"},
-      {"icon": "🎲", "label": "গেমস খেলে ইনকাম"},
-      {"icon": "📋", "label": "ফর্ম তৈরি"},
-      {"icon": "⌨️", "label": "টাইপিং জব"},
-      {"icon": "💻", "label": "ফ্রি ফ্রিল্যান্সিং কোর্স"},
-      {"icon": "🛍️", "label": "ফ্রি ইকমার্স ওয়েব সাইট"},
+
+      {"icon": "💻", "label": "ফ্রি ফ্রিল্যান্সিং"},
+      {"icon": "🛍️", "label": "ই-কমার্স"},
+      {"icon": "🎁", "label": "সি পি এ মার্কেটিং"},
+      {"icon": "🕋", "label": "ফ্রী উমরা হজ্জ"},
+      {"icon": "✈️", "label": "এয়ার টিকেট"},
     ];
 
     return Padding(
@@ -686,8 +695,8 @@ class _HomePageState extends State<HomePage> {
         physics: const NeverScrollableScrollPhysics(),
         itemCount: upcomingFeatures.length,
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 4,
-          childAspectRatio: 0.8,
+          crossAxisCount: 3,
+          //childAspectRatio: 0.8,
         ),
         itemBuilder: (context, index) {
           final item = upcomingFeatures[index];

@@ -2,6 +2,7 @@ import 'package:climax_it_user_app/screens/drive_offer/request_offer.dart';
 import 'package:climax_it_user_app/slider/drive_slider.dart';
 import 'package:climax_it_user_app/slider/home_screen_slider.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
@@ -57,11 +58,36 @@ class _DriveOfferScreenState extends State<DriveOfferScreen> {
     }
   }
 
+  void _copyOffersList() {
+    if (offers.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('No offers available to copy')),
+      );
+      return;
+    }
+
+    String offerText = offers.map((offer) {
+      return '${offer['title']}\n${offer['description']}\nPrice: ${offer['price']} টাকা\n';
+    }).join('\n');
+
+    Clipboard.setData(ClipboardData(text: offerText)).then((_) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Offers copied to clipboard')),
+      );
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text('ড্রাইভ প্যাকেজ'),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.copy),
+            onPressed: _copyOffersList,
+          ),
+        ],
       ),
       body: Column(
         children: [
@@ -113,9 +139,6 @@ class _DriveOfferScreenState extends State<DriveOfferScreen> {
             ],
           ),
           SizedBox(height: 10),
-
-
-
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: Row(

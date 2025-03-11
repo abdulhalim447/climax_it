@@ -1,0 +1,2 @@
+D:/clients_projects/climax_it_user_app/android/app/.cxx/RelWithDebInfo/1i3u3614/x86_64/CMakeFiles/edit_cache.dir
+D:/clients_projects/climax_it_user_app/android/app/.cxx/RelWithDebInfo/1i3u3614/x86_64/CMakeFiles/rebuild_cache.dir
