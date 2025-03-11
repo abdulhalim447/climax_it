@@ -13,6 +13,9 @@ class LiveSupport extends StatelessWidget {
           backgroundColor: Color(0xFF2962FF),
           centerTitle: true,
           elevation: 0,
+          leading:IconButton(onPressed: (){
+            Navigator.pop(context);
+          }, icon: Icon(Icons.arrow_back,color: Colors.white)),
         ),
         body: Tawk(
           directChatLink: 'https://tawk.to/chat/67c9dee70e9db7190b881a09/1ilm8te6m',
