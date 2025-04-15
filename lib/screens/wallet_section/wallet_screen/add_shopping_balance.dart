@@ -190,13 +190,12 @@ class _AddShoppingBalanceState extends State<AddShoppingBalance> {
                 child: ElevatedButton(
                   onPressed: () async {
                     createCheckout(
-                        fullName: name!,
-                        email: email!,
+                        fullName: name,
+                        email: email,
                         amount: _amountController.text,
-                        userId: userId!,
+                        userId: userId,
                         orderId: '');
                   },
-                  child: Text('পেমেন্ট করুন', style: TextStyle(color: Colors.white),),
                   style: ElevatedButton.styleFrom(
                     padding: EdgeInsets.symmetric(vertical: 15),
                     shape: RoundedRectangleBorder(
@@ -205,6 +204,7 @@ class _AddShoppingBalanceState extends State<AddShoppingBalance> {
                     shadowColor: Colors.blueAccent, // Shadow color
                     elevation: 5, // Elevation for shadow
                   ),
+                  child: Text('পেমেন্ট করুন', style: TextStyle(color: Colors.white),),
                 ),
               ),
             ],

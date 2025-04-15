@@ -63,16 +63,16 @@ class MyApp extends StatelessWidget {
 
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ButtonStyle(
-        padding: MaterialStateProperty.all(
+        padding: WidgetStateProperty.all(
           EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
         ),
-        backgroundColor: MaterialStateProperty.resolveWith((states) {
-          if (states.contains(MaterialState.pressed)) {
+        backgroundColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.pressed)) {
             return Colors.blue; // বোতাম চাপলে ব্লু হবে
           }
           return Colors.blue; // ডিফল্ট কালার ব্লু
         }),
-        textStyle: MaterialStateProperty.all(
+        textStyle: WidgetStateProperty.all(
           TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.bold,
@@ -80,13 +80,13 @@ class MyApp extends StatelessWidget {
             color: Colors.white, // টেক্সট সাদা হবে
           ),
         ),
-        elevation: MaterialStateProperty.resolveWith((states) {
-          if (states.contains(MaterialState.pressed)) {
+        elevation: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.pressed)) {
             return 2.0; // বোতাম চাপলে উঁচুতা কম হবে
           }
           return 6.0; // ডিফল্ট উঁচুতা
         }),
-        shape: MaterialStateProperty.all(
+        shape: WidgetStateProperty.all(
           RoundedRectangleBorder(
             borderRadius:
                 BorderRadius.circular(8.0), // বোতামের কোণ গুলো গোল হবে

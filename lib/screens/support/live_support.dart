@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_tawkto/flutter_tawk.dart';
 
 class LiveSupport extends StatelessWidget {
-  const LiveSupport({Key? key}) : super(key: key);
+  const LiveSupport({super.key});
 
   @override
   Widget build(BuildContext context) {

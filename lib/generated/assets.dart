@@ -18,13 +18,14 @@ class Assets {
   static const String iconsImg4 = 'assets/icons/img_4.png';
   static const String iconsImg5 = 'assets/icons/img_5.png';
   static const String iconsImg6 = 'assets/icons/img_6.png';
-  static const String iconsImg7 = 'assets/icons/skitto.png';
+  static const String iconsImg7 = 'assets/icons/img_7.png';
   static const String iconsMessenger = 'assets/icons/messenger.png';
   static const String iconsMyClass = 'assets/icons/my_class.png';
   static const String iconsPremium = 'assets/icons/premium.png';
   static const String iconsProjects = 'assets/icons/projects.png';
   static const String iconsRefer = 'assets/icons/refer.png';
   static const String iconsRobi = 'assets/icons/robi.png';
+  static const String iconsSkitto = 'assets/icons/skitto.png';
   static const String iconsTelegram = 'assets/icons/telegram.png';
   static const String iconsTeletalk = 'assets/icons/teletalk.png';
   static const String iconsTiktok = 'assets/icons/tiktok.png';

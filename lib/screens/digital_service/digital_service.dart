@@ -8,6 +8,8 @@ import '../../main.dart';
 import '../support/support_screen.dart';
 
 class DigitalServiceScreen extends StatefulWidget {
+  const DigitalServiceScreen({super.key});
+
   @override
   State<DigitalServiceScreen> createState() => _DigitalServiceScreenState();
 }
@@ -140,7 +142,7 @@ class AppGridItem extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.only(left: 8.0),
               child: Text(
-                "৳" + services['amount'].toString(),
+                "৳${services['amount']}",
                 style: const TextStyle(
                     fontWeight: FontWeight.bold, color: Colors.green),
                 overflow: TextOverflow.ellipsis,

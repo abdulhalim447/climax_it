@@ -35,6 +35,8 @@ class SupportScreen extends StatelessWidget {
     },
   ];
 
+   SupportScreen({super.key});
+
   // URL ওপেন করার ফাংশন
   Future<void> _launchURL(String url) async {
     if (await canLaunch(url)) {

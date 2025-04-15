@@ -17,8 +17,9 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
   double calculatedAmount = 0; // After deducting charge
   String? selectedPaymentMethod;
   bool isLoading = false; // To show loading state
-  String mainWalletBalance = "";
+  String shoppingWalletBalance = "";
   String userId = "";
+  String? amountError; // For storing amount validation error
 
   @override
   void initState() {
@@ -35,58 +36,44 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
     });
 
     if (userId.isNotEmpty) {
-      fetchWalletBalance(); // ইউজারের ব্যালেন্স চেক করবো
+      _fetchWalletBalance(); // ইউজারের ব্যালেন্স চেক করবো
     }
   }
 
- Future<void> fetchWalletBalance() async {
+  // API থেকে ইউজারের ওয়ালেট ব্যালেন্স ফেচ করা
+  Future<void> _fetchWalletBalance() async {
     try {
-      // Retrieve the token from UserSession
-      String? token = await UserSession.getToken();
+      var response = await http.post(
+        Uri.parse(
+            "https://climaxitbd.com/php/wallet/decrease-shop-balance.php"),
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({
+          "user_id": userId,
+          "action": "check_balance",
+        }),
+      );
 
-      if (token == null) {
-        throw Exception("Token not found");
-      }
-
-      // Define API URL
-      final String apiUrl = "https://climaxitbd.com/php/wallet/get_wallet_balance.php?token=$token";
-
-      // Make the GET request
-      final response = await http.get(Uri.parse(apiUrl));
-      print(response.statusCode);
-      print(response.body);
-
-      if (response.statusCode == 200) {
-        // Parse JSON response
-        final data = json.decode(response.body);
-
-        if (data['status'] == 'success') {
-          // Extract wallet data
-          final walletData = data['data'];
-
-          setState(() {
-            mainWalletBalance = walletData['main_wallet_balance'];
-          });
-
-
-
-        } else {
-          throw Exception("Failed to fetch wallet data: ${data['status']}");
-        }
+      var responseData = jsonDecode(response.body);
+      if (responseData['status'] == "success") {
+        setState(() {
+          // Store only the numeric value without the symbol
+          shoppingWalletBalance = responseData['balance'].toString();
+        });
       } else {
-        throw Exception("Failed to connect to the API");
+        _showMessage(responseData['message']);
       }
     } catch (e) {
-      print("Error: $e");
+      _showMessage("ব্যালেন্স লোড করা সম্ভব হয়নি!");
     }
   }
-
-
 
   void _updateAmount() {
     setState(() {
       double inputAmount = double.tryParse(_amountController.text) ?? 0;
       calculatedAmount = inputAmount - (inputAmount * 0.02); // Deduct 2% charge
+
+      // Clear error when user starts typing
+      amountError = null;
     });
   }
 
@@ -98,59 +85,76 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
   }
 
   Future<void> _submitWithdraw() async {
-    final String? userId = await UserSession.getUserID();
-    if (_amountController.text.isEmpty ||
-        _withdraw_numberController.text.isEmpty ||
-        selectedPaymentMethod == null) {
-      _showMessage("সব তথ্য প্রদান করুন", isError: true);
-      return;
-    }
-
-    double amount = double.tryParse(_amountController.text) ?? 0;
-    if (amount < 250) {
-      _showMessage("সর্বনিম্ন ২৫০ টাকা উইথড্র দিতে পারবেন", isError: true);
-      return;
-    }
-    if (amount > double.parse(mainWalletBalance)) {
-      _showMessage("পর্যাপ্ত পরিমান ব্যালেন্স নেই", isError: true);
-      return;
-    }
-
-    setState(() {
-      isLoading = true;
-    });
-
-    var url = Uri.parse(
-        "https://climaxitbd.com/php/withdraw/withdraw.php"); // Change to your API URL
-    var response = await http.post(
-      url,
-      headers: {"Content-Type": "application/json"},
-      body: jsonEncode({
-        "user_id": userId,
-        "amount": amount.toStringAsFixed(2),
-        "pay_method": selectedPaymentMethod,
-        "withdraw_number": _withdraw_numberController.text.toString(),
-      }),
-    );
-
-    setState(() {
-      isLoading = false;
-    });
-
-    if (response.statusCode == 200) {
-      var responseData = jsonDecode(response.body);
-      if (responseData['status'] == "success") {
-        _showMessage("উইথড্র সফল হয়েছে", isError: false);
-        _withdraw_numberController.clear();
-        _amountController.clear();
-        setState(() {
-          selectedPaymentMethod = null;
-        });
-      } else {
-        _showMessage(responseData['message'], isError: true);
+    try {
+      final String? userId = await UserSession.getUserID();
+      if (_amountController.text.isEmpty ||
+          _withdraw_numberController.text.isEmpty ||
+          selectedPaymentMethod == null) {
+        _showMessage("সব তথ্য প্রদান করুন", isError: true);
+        return;
       }
-    } else {
-      _showMessage("সার্ভার সমস্যা, আবার চেষ্টা করুন", isError: true);
+
+      double amount = double.tryParse(_amountController.text) ?? 0;
+      double balance = double.tryParse(shoppingWalletBalance) ?? 0;
+      double totalAmountWithCharge = amount +
+          (amount * 0.02); // Add 2% charge to check total required amount
+
+      // Validate amount
+      if (amount < 250) {
+        setState(() {
+          amountError = 'সর্বনিম্ন উইথড্র ২৫০ টাকা';
+        });
+        return;
+      }
+
+      // Validate balance including charge
+      if (totalAmountWithCharge > balance) {
+        setState(() {
+          amountError = 'পর্যাপ্ত পরতিমাণ ব্যালেন্স নেই।';
+        });
+        return;
+      }
+
+      setState(() {
+        isLoading = true;
+      });
+
+      var url = Uri.parse("https://climaxitbd.com/php/withdraw/withdraw.php");
+      var response = await http.post(
+        url,
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({
+          "user_id": userId,
+          "amount": amount.toStringAsFixed(2),
+          "pay_method": selectedPaymentMethod,
+          "withdraw_number": _withdraw_numberController.text.toString(),
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        var responseData = jsonDecode(response.body);
+        if (responseData['status'] == "success") {
+          _showMessage("উইথড্র সফল হয়েছে", isError: false);
+          _withdraw_numberController.clear();
+          _amountController.clear();
+          setState(() {
+            selectedPaymentMethod = null;
+            amountError = null;
+          });
+          // Refresh balance after successful withdraw
+          _fetchWalletBalance();
+        } else {
+          _showMessage(responseData['message'], isError: true);
+        }
+      } else {
+        _showMessage("সার্ভার সমস্যা, আবার চেষ্টা করুন", isError: true);
+      }
+    } catch (e) {
+      _showMessage("কিছু সমস্যা হয়েছে, আবার চেষ্টা করুন", isError: true);
+    } finally {
+      setState(() {
+        isLoading = false;
+      });
     }
   }
 
@@ -181,12 +185,13 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
                 ),
                 keyboardType: TextInputType.number,
               ),
-              SizedBox(height: 10),
+              const SizedBox(height: 10),
               TextField(
                 controller: _amountController,
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   labelText: 'টাকার পরিমাণ',
-                  border: OutlineInputBorder(),
+                  border: const OutlineInputBorder(),
+                  errorText: amountError,
                 ),
                 keyboardType: TextInputType.number,
               ),
@@ -201,7 +206,7 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
                   labelText: 'পেমেন্ট মেথড',
                   border: OutlineInputBorder(),
                 ),
-                items: <String>['বিকাশ', 'নগদ', 'উপায়']
+                items: <String>['বিকাশ', 'নগদ', 'উপায়']
                     .map<DropdownMenuItem<String>>((String value) {
                   return DropdownMenuItem<String>(
                     value: value,
@@ -231,7 +236,7 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
               ),
               const SizedBox(height: 16),
               const Text(
-                'পেমেন্ট রিকোয়েস্ট দেওয়ার ২৪ থেকে ৪৮ ঘণ্টার মধ্যে পেমেন্ট করা হবে। সর্বনিম্ন ২৫০ টাকা উইথড্র দিতে পারবেন এবং উইথড্র দেওয়ার সময় ২% চার্জ কেটে নেওয়া হবে, ধন্যবাদ।',
+                'পেমেন্ট রিকোয়েস্ট দেওয়ার ২৪ থেকে ৪৮ ঘণ্টার মধ্যে পেমেন্ট করা হবে। সর্বনিম্ন ২৫০ টাকা উইথড্র দিতে পারবেন এবং উইথড্র দেওয়ার সময় ২% চার্জ কেটে নেওয়া হবে, ধন্যবাদ।',
                 style: TextStyle(color: Colors.red),
               ),
             ],

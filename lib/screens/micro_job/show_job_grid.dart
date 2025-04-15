@@ -5,6 +5,8 @@ import 'package:http/http.dart' as http;
 import '../../main.dart'; // Import main.dart to access the verificationService
 
 class ShowJobGrid extends StatefulWidget {
+  const ShowJobGrid({super.key});
+
   @override
   _ShowJobGridState createState() => _ShowJobGridState();
 }
@@ -68,7 +70,7 @@ class ItemCard extends StatelessWidget {
   final int index;
   final List<dynamic> apiData;
 
-  ItemCard({required this.index, required this.apiData});
+  const ItemCard({super.key, required this.index, required this.apiData});
 
   @override
   Widget build(BuildContext context) {

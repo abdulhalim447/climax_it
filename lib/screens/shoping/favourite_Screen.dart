@@ -6,6 +6,8 @@ import 'dart:convert'; // to decode JSON data
 import 'package:climax_it_user_app/screens/shoping/ProductDetailScreen.dart';
 
 class FavoriteScreen extends StatefulWidget {
+  const FavoriteScreen({super.key});
+
   @override
   _FavoriteScreenState createState() => _FavoriteScreenState();
 }

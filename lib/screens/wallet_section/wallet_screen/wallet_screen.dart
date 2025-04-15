@@ -6,6 +6,8 @@ import '../../../auth/saved_login/user_session.dart';
 import 'income_screen.dart'; // নতুন স্ক্রীন ইমপোর্ট করা
 
 class WalletScreen extends StatefulWidget {
+  const WalletScreen({super.key});
+
   @override
   State<WalletScreen> createState() => _WalletScreenState();
 }

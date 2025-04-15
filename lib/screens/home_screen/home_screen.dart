@@ -23,7 +23,7 @@ import '../shoping/shoping_screen.dart';
 import 'package:climax_it_user_app/auth/LoginScreen.dart';
 
 class HomePage extends StatefulWidget {
-  const HomePage({Key? key}) : super(key: key);
+  const HomePage({super.key});
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -38,10 +38,13 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
 
+
     _userInfo();
     _showWelcomeDialog(); // Show welcome dialog if applicable
     _showFacebookGroupDialog();
   }
+
+
 
   Future<void> _userInfo() async {
     try {
@@ -132,12 +135,7 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-
-
-
-
 // Main section of the screen================================================
-
 
   @override
   Widget build(BuildContext context) {
@@ -169,14 +167,18 @@ class _HomePageState extends State<HomePage> {
         shape: CircleBorder(),
         backgroundColor: Colors.blue,
         onPressed: () {
-          Navigator.push(context, MaterialPageRoute(builder: (context)=>LiveSupport()));
+          Navigator.push(
+              context, MaterialPageRoute(builder: (context) => LiveSupport()));
         },
         tooltip: 'Increament',
-        child: const Icon(Icons.support_agent, color: Colors.white,size: 35,),
+        child: const Icon(
+          Icons.support_agent,
+          color: Colors.white,
+          size: 35,
+        ),
       ),
     );
   }
-
 
   //=======================================================================
 
@@ -202,7 +204,7 @@ class _HomePageState extends State<HomePage> {
           icon: const Icon(Icons.call),
           onPressed: () {
             // এখানে ফোন কল করার লজিক যুক্ত করুন
-            _launchURL('tel:+8801928374259');
+            _launchURL('tel:09647374259');
           },
         ),
       ],
@@ -247,7 +249,7 @@ class _HomePageState extends State<HomePage> {
                         CircleAvatar(
                           radius: 40,
                           backgroundImage: NetworkImage(
-                            'https://climaxitbd.com/php/profile/' + profilepic,
+                            'https://climaxitbd.com/php/profile/$profilepic',
                           ),
                         ),
                         SizedBox(height: 8),
@@ -571,10 +573,10 @@ class _HomePageState extends State<HomePage> {
             child: ElevatedButton(
               onPressed: () async {
                 createCheckout(
-                    fullName: name!,
-                    email: email!,
+                    fullName: name,
+                    email: email,
                     amount: '500',
-                    userId: userId!,
+                    userId: userId,
                     orderId: '');
               },
               style: ElevatedButton.styleFrom(
@@ -609,7 +611,7 @@ class _HomePageState extends State<HomePage> {
     final List<Map<String, String>> services = [
       {"icon": "assets/icons/amar_kaj.png", "label": "আমার কাজ"},
       {"icon": "assets/icons/img.png", "label": "ড্রাইভ অফার"},
-      {"icon": "assets/icons/img_1.png", "label": "মাক্রো জব"},
+      {"icon": "assets/icons/img_7.png", "label": "মাক্রো জব"},
       {"icon": "assets/icons/img_2.png", "label": "স্কিল অর্জন"},
       {"icon": "assets/icons/img_3.png", "label": "রিসেলিং"},
       {"icon": "assets/icons/img_4.png", "label": "ডিজিটাল সার্ভিস"},
@@ -640,7 +642,6 @@ class _HomePageState extends State<HomePage> {
           //childAspectRatio: 0.8,
           // mainAxisSpacing: 5,      // উপরে নিচে স্পেসিং কমানো
           // crossAxisSpacing: 5,
-
         ),
         itemBuilder: (context, index) {
           final item = services[index];
@@ -680,7 +681,6 @@ class _HomePageState extends State<HomePage> {
   Widget _buildUpcomingFeatureGrid() {
     // উদাহরণস্বরূপ কিছু আসন্ন ফিচার আইটেম
     final List<Map<String, String>> upcomingFeatures = [
-
       {"icon": "💻", "label": "ফ্রি ফ্রিল্যান্সিং"},
       {"icon": "🛍️", "label": "ই-কমার্স"},
       {"icon": "🎁", "label": "সি পি এ মার্কেটিং"},
@@ -744,7 +744,4 @@ class _HomePageState extends State<HomePage> {
       (Route<dynamic> route) => false,
     );
   }
-
-
-
 }

@@ -79,6 +79,37 @@ class _PaymentWebViewState extends State<PaymentWebView> {
     }
   }
 
+
+
+  Future<void> insertHistory() async {
+    final String? userID = await UserSession.getUserID();
+
+    if (userID!.isEmpty) {
+      // Show error message if fields are empty
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("User ID not found"),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+    final url = Uri.parse("https://climaxitbd.com/php/history.php");
+
+    final response = await http.post(
+      url,
+      headers: {"Content-Type": "application/json"},
+      body: jsonEncode({
+        "user_id": userID,
+        "description": "আপনি ৫০০ টাকা পেমেন্ট সম্পন্ন করেছেন!",
+      }),
+    );
+
+    final result = jsonDecode(response.body);
+    print(result["message"]);
+  }
+
+
   @override
   void initState() {
     super.initState();
@@ -101,6 +132,7 @@ class _PaymentWebViewState extends State<PaymentWebView> {
           // Check if the URL contains 'success.php'
           if (url.contains("success.php")) {
             _updateWallet();
+            insertHistory();
             _closeWebView(
                 "Payment Successful!", true); // Call close method on success
           }

@@ -2,7 +2,6 @@ import 'package:climax_it_user_app/screens/my_work_screen/task_screen.dart';
 import 'package:flutter/material.dart';
 import '../../auth/verification/verification_service.dart';
 
-import '../../main.dart';
 
 class MyWorkScreen extends StatefulWidget {
   const MyWorkScreen({super.key});

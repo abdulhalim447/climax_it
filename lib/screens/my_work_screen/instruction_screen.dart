@@ -11,7 +11,7 @@ import '../../main.dart';
 class InstructionScreen extends StatefulWidget {
   final Map<String, dynamic> task;
 
-  InstructionScreen({required this.task});
+  const InstructionScreen({super.key, required this.task});
 
   @override
   _InstructionScreenState createState() => _InstructionScreenState();

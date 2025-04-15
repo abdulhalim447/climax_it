@@ -12,7 +12,7 @@ class RequestDriveOffer extends StatefulWidget {
   final String description;
   final String price;
 
-  RequestDriveOffer({
+  const RequestDriveOffer({super.key, 
     required this.id,
     required this.title,
     required this.description,
@@ -102,6 +102,7 @@ class _RequestDriveOfferState extends State<RequestDriveOffer> {
 
       var responseData = jsonDecode(response.body);
       if (responseData['status'] == "success") {
+        _submitDriveRequest();
         setState(() {
           shoppingWalletBalance = "৳${responseData['new_balance']}";
         });
@@ -135,6 +136,7 @@ class _RequestDriveOfferState extends State<RequestDriveOffer> {
 
       var responseData = jsonDecode(response.body);
       if (responseData['success']) {
+        insertHistory();
         showCustomDialog(context);
       } else {
         _showMessage(responseData['message']);
@@ -144,6 +146,33 @@ class _RequestDriveOfferState extends State<RequestDriveOffer> {
     }
   }
 
+  Future<void> insertHistory() async {
+    final String? userID = await UserSession.getUserID();
+
+    if (userID!.isEmpty) {
+      // Show error message if fields are empty
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("User ID not found"),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+    final url = Uri.parse("https://climaxitbd.com/php/history.php");
+
+    final response = await http.post(
+      url,
+      headers: {"Content-Type": "application/json"},
+      body: jsonEncode({
+        "user_id": userID,
+        "description": "আপনার ড্রাইভ অফার অর্ডার সফলভাবে সম্পন্ন হয়েছে!",
+      }),
+    );
+
+    final result = jsonDecode(response.body);
+    print(result["message"]);
+  }
 
   // মেসেজ দেখানোর ফাংশন
   void _showMessage(String message) {
@@ -238,7 +267,7 @@ class _RequestDriveOfferState extends State<RequestDriveOffer> {
                 },
                 decoration: InputDecoration(
                     border: OutlineInputBorder(),
-                    labelText: "জেলা নির্বাচন করুন"),
+                    labelText: "বিভাগ নির্বাচন করুন"),
               ),
               SizedBox(height: 20),
         
@@ -251,7 +280,7 @@ class _RequestDriveOfferState extends State<RequestDriveOffer> {
         
                       if(verificationService.isVerified){
         
-                        _submitDriveRequest();
+
                         _deductBalance();
         
                       }else{

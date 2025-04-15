@@ -7,6 +7,8 @@ import 'auth_service.dart';
 import 'base_url/api_config.dart';
 
 class SignupScreen extends StatefulWidget {
+  const SignupScreen({super.key});
+
   @override
   _SignupScreenState createState() => _SignupScreenState();
 }
@@ -178,11 +180,7 @@ class _SignupScreenState extends State<SignupScreen> {
                 SizedBox(height: 80),
                 Column(
                   children: [
-                    Icon(
-                      Icons.public,
-                      size: 80,
-                      color: Colors.blue,
-                    ),
+                    Image.asset('assets/images/logo.png', height: 100, width: 100),
                     Text(
                       'Climax IT',
                       style: TextStyle(

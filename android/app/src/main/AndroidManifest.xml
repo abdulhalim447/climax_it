@@ -12,8 +12,9 @@
 
 
     <application
+        android:usesCleartextTraffic="true"
         android:requestLegacyExternalStorage="true"
-        android:label="climax_it_user_app"
+        android:label="Climax IT"
         android:name="${applicationName}"
         android:icon="@drawable/logo">
         <activity

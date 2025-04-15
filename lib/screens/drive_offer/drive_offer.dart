@@ -9,6 +9,8 @@ import 'package:http/http.dart' as http;
 import '../../main.dart';
 
 class DriveOfferScreen extends StatefulWidget {
+  const DriveOfferScreen({super.key});
+
   @override
   _DriveOfferScreenState createState() => _DriveOfferScreenState();
 }

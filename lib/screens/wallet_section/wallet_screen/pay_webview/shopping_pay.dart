@@ -81,6 +81,33 @@ class _ShoppingPayState extends State<ShoppingPay> {
     }
   }
 
+  Future<void> insertHistory() async {
+    final String? userID = await UserSession.getUserID();
+
+    if (userID!.isEmpty) {
+      // Show error message if fields are empty
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("User ID not found"),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+    final url = Uri.parse("https://climaxitbd.com/php/history.php");
+
+    final response = await http.post(
+      url,
+      headers: {"Content-Type": "application/json"},
+      body: jsonEncode({
+        "user_id": userID,
+        "description": "আপনি ${widget.amount} টাকা পেমেন্ট সম্পন্ন করেছেন!",
+      }),
+    );
+
+    final result = jsonDecode(response.body);
+    print(result["message"]);
+  }
 
   @override
   void initState() {
@@ -104,6 +131,7 @@ class _ShoppingPayState extends State<ShoppingPay> {
           // Check if the URL contains 'success.php'
           if (url.contains("success.php")) {
             updateWalletBalance();
+            insertHistory();
             _closeWebView(
                 "Payment Successful!", true); // Call close method on success
           }

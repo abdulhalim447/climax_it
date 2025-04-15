@@ -7,7 +7,7 @@ class IncomeScreen extends StatefulWidget {
   final String filter;
   final String title;
 
-  IncomeScreen({required this.filter, required this.title});
+  const IncomeScreen({super.key, required this.filter, required this.title});
 
   @override
   _IncomeScreenState createState() => _IncomeScreenState();

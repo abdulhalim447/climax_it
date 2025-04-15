@@ -15,6 +15,7 @@ class ProfilePage extends StatefulWidget {
 class _ProfilePageState extends State<ProfilePage> {
   Map<String, dynamic> profileData = {};
   bool isLoading = true;
+  bool hasError = false;
 
   @override
   void initState() {
@@ -22,31 +23,56 @@ class _ProfilePageState extends State<ProfilePage> {
     fetchProfile();
   }
 
+  String getProfileImageUrl(String? profilePic) {
+    if (profilePic == null || profilePic.isEmpty) {
+      return 'https://climaxitbd.com/php/profile/default_avatar.png'; // Replace with your default image
+    }
+    return 'https://climaxitbd.com/php/profile/$profilePic';
+  }
+
   Future<void> fetchProfile() async {
-    final String? userId = await UserSession.getUserID();
     try {
+      final String? userId = await UserSession.getUserID();
+      if (userId == null || userId.isEmpty) {
+        setState(() {
+          isLoading = false;
+          hasError = true;
+        });
+        return;
+      }
+
       final response = await http.get(Uri.parse(
           'https://climaxitbd.com/php/auth/get_profile.php?user_id=$userId'));
 
       if (response.statusCode == 200) {
-        setState(() {
-          profileData = json.decode(response.body);
-          isLoading = false;
-        });
-
+        final decodedData = json.decode(response.body);
+        if (decodedData != null && decodedData is Map<String, dynamic>) {
+          setState(() {
+            profileData = decodedData;
+            isLoading = false;
+            hasError = false;
+          });
+        } else {
+          setState(() {
+            isLoading = false;
+            hasError = true;
+          });
+        }
       } else {
         setState(() {
           isLoading = false;
+          hasError = true;
         });
         throw Exception('Failed to load profile');
       }
     } catch (e) {
       setState(() {
         isLoading = false;
+        hasError = true;
       });
-      print(e);
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text('Error fetching profile: $e')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error fetching profile. Please try again.')),
+      );
     }
   }
 
@@ -59,101 +85,102 @@ class _ProfilePageState extends State<ProfilePage> {
           IconButton(
             icon: const Icon(Icons.edit),
             onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => EditProfilePage(
-                    name: profileData['name'] ?? '',
-                    phone: profileData['phone'] ?? '',
-                    email: profileData['email'] ?? '',
-                    sex: profileData['sex'] ?? '',
-                    address: profileData['address'] ?? '',
-                    country: profileData['country'] ?? '',
-                    profilePic: "https://climaxitbd.com/php/profile/"+profileData['profile_pic'] ?? '',
+              if (!hasError && profileData.isNotEmpty) {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => EditProfilePage(
+                      name: profileData['name']?.toString() ?? '',
+                      phone: profileData['phone']?.toString() ?? '',
+                      email: profileData['email']?.toString() ?? '',
+                      sex: profileData['sex']?.toString() ?? '',
+                      address: profileData['address']?.toString() ?? '',
+                      country: profileData['country']?.toString() ?? '',
+                      profilePic: getProfileImageUrl(
+                          profileData['profile_pic']?.toString()),
+                    ),
                   ),
-                ),
-              );
+                ).then((_) => fetchProfile()); // Refresh profile after editing
+              }
             },
           ),
         ],
       ),
       body: isLoading
-          ? Center(child: CircularProgressIndicator()) // Loading indicator
-          : profileData.isNotEmpty
-              ? Column(
-                  children: [
-                    Container(
-                      width: double.infinity,
-                      color: Colors.blue,
-                      child: Column(
-                        children: [
-                          CircleAvatar(
-                            radius: 40,
-                            backgroundImage: NetworkImage("https://climaxitbd.com/php/profile/"+
-                                profileData['profile_pic']), // Add your image asset here
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            profileData['name'],
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ],
+          ? const Center(child: CircularProgressIndicator())
+          : hasError
+              ? Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Text('Failed to load profile data'),
+                      const SizedBox(height: 16),
+                      ElevatedButton(
+                        onPressed: fetchProfile,
+                        child: const Text('Try Again'),
                       ),
-                    ),
-                    Expanded(
-                      child: Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: ListView(
-                          children: [
-                            Card(
-                              child: ListTile(
-                                title: Text('সম্পূর্ণ নাম'),
-                                subtitle: Text(profileData['name'] ?? 'N/A'),
-                              ),
-                            ),
-                            Card(
-                              child: ListTile(
-                                title: Text('মোবাইল নাম্বার'),
-                                subtitle: Text(profileData['phone'] ?? 'N/A'),
-                              ),
-                            ),
-                            Card(
-                              child: ListTile(
-                                title: Text('ইমেইল'),
-                                subtitle: Text(profileData['email'] ?? 'N/A'),
-                              ),
-                            ),
-                            Card(
-                              child: ListTile(
-                                title: Text('লিঙ্গ'),
-                                subtitle: Text(profileData['sex'] ?? 'N/A'),
-                              ),
-                            ),
-                            Card(
-                              child: ListTile(
-                                title: Text('ঠিকানা'),
-                                subtitle: Text(profileData['address'] ?? 'N/A'),
-                              ),
-                            ),
-                            Card(
-                              child: ListTile(
-                                title: Text('দেশ'),
-                                subtitle: Text(profileData['country'] ?? 'N/A'),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
+                    ],
+                  ),
                 )
-              : Center(
-                  child: Text(
-                      'No profile data available')), // Error handling for empty profileData
+              : profileData.isNotEmpty
+                  ? Column(
+                      children: [
+                        Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.symmetric(vertical: 20),
+                          color: Colors.blue,
+                          child: Column(
+                            children: [
+                              CircleAvatar(
+                                radius: 40,
+                                backgroundColor: Colors.grey[300],
+                                backgroundImage: NetworkImage(
+                                  getProfileImageUrl(
+                                      profileData['profile_pic']?.toString()),
+                                ),
+                                onBackgroundImageError: (e, s) {
+                                  // Handle image load error
+                                },
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                profileData['name']?.toString() ?? 'N/A',
+                                style: const TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Expanded(
+                          child: Padding(
+                            padding: const EdgeInsets.all(16.0),
+                            child: ListView(
+                              children: [
+                                _buildInfoCard('সম্পূর্ণ নাম', 'name'),
+                                _buildInfoCard('মোবাইল নাম্বার', 'phone'),
+                                _buildInfoCard('ইমেইল', 'email'),
+                                _buildInfoCard('লিঙ্গ', 'sex'),
+                                _buildInfoCard('ঠিকানা', 'address'),
+                                _buildInfoCard('দেশ', 'country'),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    )
+                  : const Center(child: Text('No profile data available')),
+    );
+  }
+
+  Widget _buildInfoCard(String title, String dataKey) {
+    return Card(
+      child: ListTile(
+        title: Text(title),
+        subtitle: Text(profileData[dataKey]?.toString() ?? 'N/A'),
+      ),
     );
   }
 }

@@ -21,6 +21,8 @@ class VideoItem {
 
 
 class VideoListScreen extends StatefulWidget {
+  const VideoListScreen({super.key});
+
   @override
   _VideoListScreenState createState() => _VideoListScreenState();
 }
@@ -140,7 +142,7 @@ class _VideoListScreenState extends State<VideoListScreen> {
                               ),
                               SizedBox(height: 5),
                               Text(
-                                "Duration: " + video.duration,
+                                "Duration: ${video.duration}",
                                 style: TextStyle(color: Colors.grey),
                               ),
                             ],

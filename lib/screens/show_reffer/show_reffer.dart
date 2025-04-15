@@ -4,6 +4,8 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 class ReferralPage extends StatefulWidget {
+  const ReferralPage({super.key});
+
   @override
   _ReferralPageState createState() => _ReferralPageState();
 }

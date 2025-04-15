@@ -33,8 +33,8 @@ class _ProductItemState extends State<ProductItem> {
         .toList();
 
     setState(() {
-      _isFavorite = favorites.any((favProduct) =>
-      favProduct.productCode == widget.product.productCode);
+      _isFavorite = favorites.any(
+          (favProduct) => favProduct.productCode == widget.product.productCode);
     });
   }
 
@@ -45,8 +45,8 @@ class _ProductItemState extends State<ProductItem> {
         .map((jsonStr) => Product.fromJson(json.decode(jsonStr)))
         .toList();
 
-    if (!favorites.any((favProduct) =>
-    favProduct.productCode == product.productCode)) {
+    if (!favorites
+        .any((favProduct) => favProduct.productCode == product.productCode)) {
       favorites.add(product);
       favoritesJson =
           favorites.map((product) => json.encode(product.toJson())).toList();
@@ -54,11 +54,11 @@ class _ProductItemState extends State<ProductItem> {
       setState(() {
         _isFavorite = true;
       });
-      ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Added to Favorites!")));
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text("Added to Favorites!")));
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Already in Favorites!")));
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text("Already in Favorites!")));
     }
   }
 
@@ -70,15 +70,15 @@ class _ProductItemState extends State<ProductItem> {
         .toList();
 
     favorites.removeWhere(
-            (favProduct) => favProduct.productCode == product.productCode);
+        (favProduct) => favProduct.productCode == product.productCode);
     favoritesJson =
         favorites.map((product) => json.encode(product.toJson())).toList();
     await prefs.setStringList('favorites', favoritesJson);
     setState(() {
       _isFavorite = false;
     });
-    ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Removed from Favorites!")));
+    ScaffoldMessenger.of(context)
+        .showSnackBar(const SnackBar(content: Text("Removed from Favorites!")));
   }
 
   @override
@@ -91,94 +91,156 @@ class _ProductItemState extends State<ProductItem> {
         ),
       ),
       child: Container(
-        width: 180,
-        margin: const EdgeInsets.symmetric(horizontal: 8),
+        width: 160,
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(15),
           boxShadow: [
             BoxShadow(
-              color: Colors.black12,
-              blurRadius: 3,
-              offset: const Offset(0, 2),
-            )
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 10,
+              offset: const Offset(0, 5),
+            ),
           ],
         ),
-        child: Stack( // Use a Stack to overlay icons
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            Stack(
               children: [
                 ClipRRect(
                   borderRadius:
-                  const BorderRadius.vertical(top: Radius.circular(12)),
-                  child: CachedNetworkImage(
-                    imageUrl: widget.product.thumbnail,
-                    height: 120,
+                      const BorderRadius.vertical(top: Radius.circular(15)),
+                  child: SizedBox(
+                    height: 140,
                     width: double.infinity,
-                    fit: BoxFit.cover,
-                    placeholder: (context, url) =>
-                    Transform.scale(scale: 1.5, child: const CircularProgressIndicator()),
-                    errorWidget: (context, url, error) =>
-                    const Icon(Icons.error),
+                    child: CachedNetworkImage(
+                      imageUrl: widget.product.thumbnail,
+                      fit: BoxFit.cover,
+                      placeholder: (context, url) => Container(
+                        color: Colors.grey[200],
+                        child: Center(
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Theme.of(context).primaryColor,
+                          ),
+                        ),
+                      ),
+                      errorWidget: (context, url, error) => Container(
+                        color: Colors.grey[200],
+                        child: Icon(Icons.error_outline, color: Colors.grey),
+                      ),
+                    ),
                   ),
                 ),
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Text(
-                    widget.product.productName,
-                    style: const TextStyle(fontWeight: FontWeight.bold),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
+                if (widget.product.discount != "0%" &&
+                    widget.product.discount != '0')
+                  Positioned(
+                    top: 8,
+                    left: 8,
+                    child: Container(
+                      padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: Colors.red,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        widget.product.discount,
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
                   ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                  child: Text(
-                    'TK ${widget.product.resellerPrice} | Stock ${widget.product.stock}',
-                    style: TextStyle(
-                        color: Colors.green.shade700,
-                        fontWeight: FontWeight.w600),
+                Positioned(
+                  top: 8,
+                  right: 8,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.1),
+                          blurRadius: 5,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: IconButton(
+                      icon: Icon(
+                        _isFavorite ? Icons.favorite : Icons.favorite_border,
+                        size: 20,
+                        color: _isFavorite ? Colors.red : Colors.grey,
+                      ),
+                      onPressed: () {
+                        if (_isFavorite) {
+                          _removeFromFavorites(widget.product);
+                        } else {
+                          _addToFavorites(widget.product);
+                        }
+                      },
+                    ),
                   ),
                 ),
               ],
             ),
-            Positioned( // Favorite Icon
-              top: 8,
-              right: 8,
-              child: IconButton(
-                onPressed: () {
-                  if (_isFavorite) {
-                    _removeFromFavorites(widget.product);
-                  } else {
-                    _addToFavorites(widget.product);
-                  }
-                },
-                icon: Icon(
-                  _isFavorite ? Icons.favorite : Icons.favorite_outline,
-                  color: _isFavorite ? Colors.red : Colors.grey,
-                ),
+            Padding(
+              padding: const EdgeInsets.all(12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    widget.product.productName,
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.black87,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  SizedBox(height: 8),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'TK ${widget.product.resellerPrice}',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Theme.of(context).primaryColor,
+                        ),
+                      ),
+                      Container(
+                        padding:
+                            EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: int.parse(widget.product.stock) > 0
+                              ? Colors.green.withOpacity(0.1)
+                              : Colors.red.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text(
+                          int.parse(widget.product.stock) > 0
+                              ? 'In Stock'
+                              : 'Out of Stock',
+                          style: TextStyle(
+                            fontSize: 10,
+                            color: int.parse(widget.product.stock) > 0
+                                ? Colors.green
+                                : Colors.red,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
             ),
-            if (widget.product.discount != "0%" && widget.product.discount != '0') // Discount Prize
-              Positioned(
-                top: 8,
-                left: 8,
-                child: Container(
-                  padding: const EdgeInsets.all(4),
-                  decoration: BoxDecoration(
-                    color: Colors.amber,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Text(
-                    widget.product.discount,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 12,
-                    ),
-                  ),
-                ),
-              ),
           ],
         ),
       ),

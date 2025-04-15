@@ -16,9 +16,10 @@ class ShoppingScreen extends StatefulWidget {
 
 class _ShoppingScreenState extends State<ShoppingScreen> {
   late Future<List<Product>> _futureProducts;
-  TextEditingController _searchController = TextEditingController();
+  final TextEditingController _searchController = TextEditingController();
   List<Product> allProducts = [];
   List<Product> filteredProducts = [];
+  final ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
@@ -79,59 +80,121 @@ class _ShoppingScreenState extends State<ShoppingScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('শপিং'),
-
-      actions: [
-        IconButton(onPressed: (){
-          Navigator.push(context, MaterialPageRoute(builder: (context)=>FavoriteScreen()));
-        }, icon: Icon(Icons.favorite_sharp))
-      ],
-      ),
-      body: Column(
-        children: [
-          // Search TextField
-          Padding(
-            padding: const EdgeInsets.only(top: 8.0),
-            child: HomeBannerSlider(),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: TextField(
-              controller: _searchController,
-              onChanged: _filterProducts, // Filter products as user types
-              decoration: InputDecoration(
-                hintText: 'পণ্য খুঁজুন...',
-                prefixIcon: Icon(Icons.search),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8.0),
+      backgroundColor: Colors.grey[50],
+      body: CustomScrollView(
+        controller: _scrollController,
+        slivers: [
+          SliverAppBar(
+            expandedHeight: 120.0,
+            floating: true,
+            pinned: true,
+            elevation: 0,
+            backgroundColor: Theme.of(context).primaryColor,
+            flexibleSpace: FlexibleSpaceBar(
+              title: Text(
+                'শপিং',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              background: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Theme.of(context).primaryColor,
+                      Theme.of(context).primaryColor.withOpacity(0.8),
+                    ],
+                  ),
                 ),
               ),
             ),
+            actions: [
+              IconButton(
+                icon: Icon(Icons.favorite, color: Colors.white),
+                onPressed: () {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => FavoriteScreen()));
+                },
+              ),
+              SizedBox(width: 8),
+            ],
           ),
-          // FutureBuilder to fetch data
-          Expanded(
+          SliverToBoxAdapter(
+            child: Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(15),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.1),
+                          blurRadius: 10,
+                          offset: Offset(0, 3),
+                        ),
+                      ],
+                    ),
+                    child: TextField(
+                      controller: _searchController,
+                      onChanged: _filterProducts,
+                      decoration: InputDecoration(
+                        hintText: 'পণ্য খুঁজুন...',
+                        prefixIcon: Icon(Icons.search,
+                            color: Theme.of(context).primaryColor),
+                        border: InputBorder.none,
+                        contentPadding:
+                            EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+                      ),
+                    ),
+                  ),
+                ),
+                HomeBannerSlider(),
+              ],
+            ),
+          ),
+          SliverToBoxAdapter(
             child: FutureBuilder<List<Product>>(
               future: _futureProducts,
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
-                  return Center(child: Transform.scale(scale: 1.2,child: CircularProgressIndicator()));
+                  return Center(
+                    child: Padding(
+                      padding: EdgeInsets.all(20),
+                      child: CircularProgressIndicator(),
+                    ),
+                  );
                 }
                 if (snapshot.hasError) {
-                  return Center(child: Text('Error: ${snapshot.error}'));
+                  return Center(
+                    child: Padding(
+                      padding: EdgeInsets.all(20),
+                      child: Text(
+                        'Error: ${snapshot.error}',
+                        style: TextStyle(color: Colors.red),
+                      ),
+                    ),
+                  );
                 }
 
-                // Data is available, proceed to display
-                final products = filteredProducts.isEmpty ? snapshot.data! : filteredProducts;
+                final products = filteredProducts.isEmpty
+                    ? snapshot.data!
+                    : filteredProducts;
                 final groupedProducts = _groupProductsByCategory(products);
 
-                return SingleChildScrollView(
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Column(
-                      children: groupedProducts.entries.map((entry) {
-                        return _buildCategorySection(context, entry.key, entry.value);
-                      }).toList(),
-                    ),
+                return Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    children: groupedProducts.entries.map((entry) {
+                      return _buildCategorySection(
+                          context, entry.key, entry.value);
+                    }).toList(),
                   ),
                 );
               },
@@ -142,38 +205,67 @@ class _ShoppingScreenState extends State<ShoppingScreen> {
     );
   }
 
-  // Build UI for each category and products under it
-  Widget _buildCategorySection(BuildContext context, String category, List<Product> products) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(category, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-              TextButton(
-                onPressed: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => AllProductsScreen(products: products),
+  Widget _buildCategorySection(
+      BuildContext context, String category, List<Product> products) {
+    return Container(
+      margin: EdgeInsets.only(bottom: 24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(bottom: 16.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  category,
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black87,
                   ),
                 ),
-                child: const Text('সব দেখুন..'),
+                TextButton(
+                  onPressed: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) =>
+                          AllProductsScreen(products: products),
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Text(
+                        'সব দেখুন',
+                        style: TextStyle(
+                          color: Theme.of(context).primaryColor,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      Icon(
+                        Icons.arrow_forward_ios,
+                        size: 14,
+                        color: Theme.of(context).primaryColor,
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          SizedBox(
+            height: 250,
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              itemCount: products.length,
+              itemBuilder: (context, index) => Padding(
+                padding: EdgeInsets.only(right: 16),
+                child: ProductItem(product: products[index]),
               ),
-            ],
+            ),
           ),
-        ),
-        SizedBox(
-          height: 200,
-          child: ListView.builder(
-            scrollDirection: Axis.horizontal,
-            itemCount: products.length,
-            itemBuilder: (context, index) => ProductItem(product: products[index]),
-          ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

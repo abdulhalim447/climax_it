@@ -11,10 +11,10 @@ class CheckoutScreen extends StatefulWidget {
   final int initialQuantity;
 
   const CheckoutScreen({
-    Key? key,
+    super.key,
     required this.product,
     this.initialQuantity = 1,
-  }) : super(key: key);
+  });
 
   @override
   State<CheckoutScreen> createState() => _CheckoutScreenState();
@@ -1075,6 +1075,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         if (data['success'] == true) {
+          insertHistory();
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('অর্ডার সফলভাবে সম্পন্ন হয়েছে!')),
           );
@@ -1094,6 +1095,34 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         _isLoading = false;
       });
     }
+  }
+
+  Future<void> insertHistory() async {
+    final String? userID = await UserSession.getUserID();
+
+    if (userID!.isEmpty) {
+      // Show error message if fields are empty
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("User ID not found"),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+    final url = Uri.parse("https://climaxitbd.com/php/history.php");
+
+    final response = await http.post(
+      url,
+      headers: {"Content-Type": "application/json"},
+      body: jsonEncode({
+        "user_id": userID,
+        "description": "আপনার শপিং অর্ডার সফলভাবে সম্পন্ন হয়েছে!",
+      }),
+    );
+
+    final result = jsonDecode(response.body);
+    print(result["message"]);
   }
   // decrease balance from shopping balance
 

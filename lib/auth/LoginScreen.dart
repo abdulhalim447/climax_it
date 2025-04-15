@@ -9,6 +9,8 @@ import '../bottom_navigation/MainNavigationScreen.dart';
 import 'base_url/api_config.dart';
 
 class LoginScreen extends StatefulWidget {
+  const LoginScreen({super.key});
+
   @override
   _LoginScreenState createState() => _LoginScreenState();
 }
@@ -52,7 +54,8 @@ class _LoginScreenState extends State<LoginScreen> {
       final response = await http.post(
         Uri.parse(ApiConfig.loginApi), // API URL
         headers: {'Content-Type': 'application/json'},
-        body: json.encode({'phone': phone, 'password': password, 'countryCode':countryCode}),
+        body: json.encode(
+            {'phone': phone, 'password': password, 'countryCode': countryCode}),
       );
 
       setState(() {
@@ -67,25 +70,23 @@ class _LoginScreenState extends State<LoginScreen> {
 
         if (responseData['message'] == 'Login successful!') {
           final userData = responseData['data'];
-          String token = userData['token'];
-          String name = userData['name'];
-          String email = userData['email'];
-          String referCode = userData['referCode'];
-          String userID = userData['id'].toString();
-          String profilePic = userData['profile_pic'];
-
+          String token = userData['token'] ?? '';
+          String name = userData['name'] ?? '';
+          String email = userData['email'] ?? '';
+          String referCode = userData['referCode'] ?? '';
+          String userID = userData['id']?.toString() ?? '';
+          // Handle null profile_pic
+          String profilePic = userData['profile_pic']?.toString() ?? '';
 
           // Save data to UserSession
-          //await UserSession.saveSession(token, fullPhone, name, referCode);
-          // Save data to UserSession
-          await UserSession.saveSession(token, fullPhone, name, referCode,userID,email,profilePic);
-
+          await UserSession.saveSession(
+              token, fullPhone, name, referCode, userID, email, profilePic);
 
           // Navigate to the next screen
           Navigator.pushAndRemoveUntil(
             context,
             MaterialPageRoute(builder: (context) => MainNavigationScreen()),
-                (Route<dynamic> route) => false, // Remove all routes
+            (Route<dynamic> route) => false, // Remove all routes
           );
         } else {
           _showErrorDialog(responseData['message'] ?? 'Login failed');
@@ -97,10 +98,9 @@ class _LoginScreenState extends State<LoginScreen> {
       setState(() {
         isLoading = false; // End loading in case of error
       });
-      _showErrorDialog('An error occurred.$error+ Please try again.');
+      _showErrorDialog('An error occurred. Please try again.');
     }
   }
-
 
   // Function to show error dialog
   void _showErrorDialog(String message) {
@@ -143,11 +143,8 @@ class _LoginScreenState extends State<LoginScreen> {
                 SizedBox(height: 80),
                 Column(
                   children: [
-                    Icon(
-                      Icons.public,
-                      size: 80,
-                      color: Colors.blue,
-                    ),
+                    Image.asset('assets/images/logo.png',
+                        height: 100, width: 100),
                     Text(
                       'Climax IT',
                       style: TextStyle(

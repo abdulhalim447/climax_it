@@ -7,7 +7,7 @@ import '../../main.dart';
 class MicroWorkScreen extends StatelessWidget {
   final Map<String, dynamic> item;
 
-  MicroWorkScreen({required this.item});
+  const MicroWorkScreen({super.key, required this.item});
 
   @override
   Widget build(BuildContext context) {

@@ -11,6 +11,8 @@ import '../screens/show_reffer/show_reffer.dart';
 import '../screens/wallet_section/wallet_screen/wallet_screen.dart';
 
 class MainNavigationScreen extends StatefulWidget {
+  const MainNavigationScreen({super.key});
+
   @override
   _MainNavigationScreenState createState() => _MainNavigationScreenState();
 }
@@ -130,7 +132,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
       bottomNavigationBar: Padding(
         padding: EdgeInsets.symmetric(
             horizontal: isMobile ? 0 : (screenWidth - 600) / 2),
-        child: Container(
+        child: SizedBox(
           width: isMobile ? double.infinity : 600,
           child: BottomNavigationBar(
             backgroundColor: Colors.blue,

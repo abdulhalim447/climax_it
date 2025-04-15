@@ -1,5 +1,5 @@
 name: climax_it_user_app
-description: "This project for Climax IT"
+description: "Climax IT"
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
@@ -44,7 +44,6 @@ dependencies:
   shared_preferences: ^2.3.4
   url_launcher: ^6.3.1
   dio: ^5.8.0+1
-  video_player: ^2.9.3
   cached_network_image: ^3.4.1
   uddoktapay: ^0.0.4
   get: ^4.7.1
@@ -54,6 +53,8 @@ dependencies:
   intl: ^0.20.2
   path_provider: ^2.1.5
   flutter_tawkto:
+  video_player:
+
 
 
 

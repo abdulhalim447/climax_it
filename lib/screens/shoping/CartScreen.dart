@@ -8,7 +8,7 @@ import 'checkout_screen.dart';
 
 
 class CartScreen extends StatefulWidget {
-  const CartScreen({Key? key}) : super(key: key);
+  const CartScreen({super.key});
 
   @override
   State<CartScreen> createState() => _CartScreenState();
@@ -16,7 +16,7 @@ class CartScreen extends StatefulWidget {
 
 class _CartScreenState extends State<CartScreen> {
   List<Product> _cartItems = [];
-  Map<String, int> _quantities = {};
+  final Map<String, int> _quantities = {};
   bool _isLoading = false;
 
   @override

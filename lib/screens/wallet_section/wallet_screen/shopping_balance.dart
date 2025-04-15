@@ -128,7 +128,6 @@ class _ShoppingBalanceState extends State<ShoppingBalance> {
                 onPressed: () {
                   Navigator.push(context, MaterialPageRoute(builder: (context)=>AddShoppingBalance(shoppingWalletBalance: shoppingWalletBalance,)));
                 },
-                child: Text('শপিং ব্যালেন্স যোগ করুন'),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.white,
                   foregroundColor: Colors.blue,
@@ -136,6 +135,7 @@ class _ShoppingBalanceState extends State<ShoppingBalance> {
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10)),
                 ),
+                child: Text('শপিং ব্যালেন্স যোগ করুন'),
               ),
             ),
           ],

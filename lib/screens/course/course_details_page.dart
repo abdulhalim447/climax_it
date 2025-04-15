@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
-import 'dart:async';
 
 class VideoDetailPage extends StatefulWidget {
   final String videoLink;
 
-  VideoDetailPage({required this.videoLink});
+  const VideoDetailPage({super.key, required this.videoLink});
 
   @override
   _VideoDetailPageState createState() => _VideoDetailPageState();
@@ -13,119 +12,132 @@ class VideoDetailPage extends StatefulWidget {
 
 class _VideoDetailPageState extends State<VideoDetailPage> {
   late VideoPlayerController _controller;
-  bool _isPlaying = false;
-  bool _showControls = true;
-  Timer? _hideControlsTimer;
+  bool _isLoading = true;
+  String? _errorMessage;
 
   @override
   void initState() {
     super.initState();
-    _controller = VideoPlayerController.network(widget.videoLink)
-      ..initialize().then((_) {
-        setState(() {});
+    _initializePlayer();
+  }
+
+  Future<void> _initializePlayer() async {
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+
+    try {
+      // Using VideoPlayerController to load the video
+      _controller = VideoPlayerController.network(
+        widget.videoLink,
+        // Add any headers if required for the video URL
+      )..initialize().then((_) {
+        // Ensure the first frame is shown once the controller is initialized
+        setState(() {
+          _isLoading = false;
+        });
       });
+
+      // Set loop and autoplay if needed
+      _controller.setLooping(false);
+      _controller.setVolume(1.0);
+    } catch (error) {
+      print("Error initializing video player: $error");
+      setState(() {
+        _isLoading = false;
+        _errorMessage = 'Failed to load video: ${error.toString()}';
+      });
+      _showErrorSnackBar(error.toString());
+    }
+  }
+
+  void _showErrorSnackBar(String message) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Colors.red,
+        duration: Duration(seconds: 5),
+        action: SnackBarAction(
+          label: 'Retry',
+          onPressed: _initializePlayer,
+          textColor: Colors.white,
+        ),
+      ),
+    );
   }
 
   @override
   void dispose() {
     _controller.dispose();
-    _hideControlsTimer?.cancel();
     super.dispose();
-  }
-
-  void _togglePlayPause() {
-    setState(() {
-      if (_controller.value.isPlaying) {
-        _controller.pause();
-        _isPlaying = false;
-      } else {
-        _controller.play();
-        _isPlaying = true;
-      }
-      _resetHideTimer();
-    });
-  }
-
-  void _resetHideTimer() {
-    _hideControlsTimer?.cancel();
-    _hideControlsTimer = Timer(Duration(seconds: 3), () {
-      setState(() {
-        _showControls = false;
-      });
-    });
-  }
-
-  void _toggleControls() {
-    setState(() {
-      _showControls = !_showControls;
-      if (_showControls) {
-        _resetHideTimer();
-      }
-    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.black,
-      body: Center(
-        child: _controller.value.isInitialized
-            ? GestureDetector(
-                onTap: _toggleControls,
-                child: Stack(
-                  alignment: Alignment.center,
-                  children: <Widget>[
-                    Container(
-                      width: double.infinity,
-                      height: _controller.value.size.height,
-                      child: FittedBox(
-                        fit: BoxFit.contain,
-                        child: SizedBox(
-                          width: _controller.value.size.width,
-                          height: _controller.value.size.height,
-                          child: VideoPlayer(_controller),
-                        ),
-                      ),
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+      ),
+      body: SafeArea(
+        child: Center(
+          child: _isLoading
+              ? CircularProgressIndicator()
+              : _errorMessage != null
+              ? Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                _errorMessage!,
+                style: TextStyle(color: Colors.white),
+                textAlign: TextAlign.center,
+              ),
+              SizedBox(height: 16),
+              ElevatedButton(
+                onPressed: _initializePlayer,
+                child: Text('Retry'),
+              ),
+            ],
+          )
+              : Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              AspectRatio(
+                aspectRatio: _controller.value.aspectRatio,
+                child: VideoPlayer(_controller),
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  IconButton(
+                    icon: Icon(
+                      _controller.value.isPlaying
+                          ? Icons.pause
+                          : Icons.play_arrow,
+                      color: Colors.white,
                     ),
-                    if (_showControls)
-                      Positioned(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            IconButton(
-                              icon: Icon(
-                                _isPlaying ? Icons.pause : Icons.play_arrow,
-                                size: 50,
-                                color: Colors.white,
-                              ),
-                              onPressed: _togglePlayPause,
-                            ),
-                          ],
-                        ),
-                      ),
-                    if (_showControls)
-                      Positioned(
-                        bottom: 10,
-                        left: 0,
-                        right: 0,
-                        child: Column(
-                          children: [
-                            VideoProgressIndicator(
-                              _controller,
-                              allowScrubbing: true,
-                              colors: VideoProgressColors(
-                                playedColor: Colors.red,
-                                bufferedColor: Colors.white38,
-                                backgroundColor: Colors.white24,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                  ],
-                ),
-              )
-            : CircularProgressIndicator(),
+                    onPressed: () {
+                      setState(() {
+                        if (_controller.value.isPlaying) {
+                          _controller.pause();
+                        } else {
+                          _controller.play();
+                        }
+                      });
+                    },
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

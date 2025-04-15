@@ -3,6 +3,8 @@ import 'instruction_screen.dart';
 import 'task_service.dart';
 
 class TaskScreen extends StatefulWidget {
+  const TaskScreen({super.key});
+
   @override
   _TaskScreenState createState() => _TaskScreenState();
 }
@@ -63,13 +65,13 @@ class TaskCard extends StatelessWidget {
   final Map<String, dynamic> taskData;
 
   const TaskCard({
-    Key? key,
+    super.key,
     required this.id,
     required this.title,
     required this.thumbnail,
     required this.subtitle,
     required this.taskData,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

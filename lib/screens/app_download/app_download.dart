@@ -8,9 +8,10 @@ import 'package:open_file/open_file.dart';
 import 'dart:convert';
 
 import '../../auth/saved_login/user_session.dart';
-import '../../main.dart';
 
 class AppGridScreen extends StatefulWidget {
+  const AppGridScreen({super.key});
+
   @override
   _AppGridScreenState createState() => _AppGridScreenState();
 }
@@ -111,7 +112,7 @@ class _AppGridItemState extends State<AppGridItem> {
         savePath,
         onReceiveProgress: (received, total) {
           if (total != -1) {
-            print((received / total * 100).toStringAsFixed(0) + "%");
+            print("${(received / total * 100).toStringAsFixed(0)}%");
           }
         },
       );
@@ -201,7 +202,7 @@ class _AppGridItemState extends State<AppGridItem> {
                   Padding(
                     padding: const EdgeInsets.only(left: 8.0),
                     child: Text(
-                      "৳" + widget.app['amount'].toString(),
+                      "৳${widget.app['amount']}",
                       style: const TextStyle(
                           fontWeight: FontWeight.bold, color: Colors.green),
                       overflow: TextOverflow.ellipsis,
@@ -226,31 +227,14 @@ class _AppGridItemState extends State<AppGridItem> {
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: () async {
-                    if (verificationService.isVerified) {
-                      // If the account is verified, proceed with the logic
-                      if (_isPremium) {
-                        _showPremiumDialog();
-                      } else {
-                        if (await Permission.storage.request().isGranted) {
-                          _downloadFileWithDio(); // Call the download function
-                        } else {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('Permission Denied')),
-                          );
-                        }
-                      }
+                    if (_isPremium) {
+                      _showPremiumDialog();
                     } else {
-                      // If the account is not verified, show SnackBar
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            "আপনার একাউন্ট ভেরিফাইড নয়। একাউট ভেরিফাই করুন । ধন্যবাদ",
-                            style: TextStyle(color: Colors.white), // Text color
-                          ),
-                          backgroundColor: Colors.red, // Red background color
-                          duration: Duration(seconds: 3), // Duration for visibility
-                        ),
-                      );
+                      if (await Permission.storage.request().isGranted) {
+                        _downloadFileWithDio(); // Call the download function
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Permission Denied')));
+                      }
                     }
                   },
                   style: ElevatedButton.styleFrom(
@@ -264,7 +248,6 @@ class _AppGridItemState extends State<AppGridItem> {
                     style: TextStyle(color: Colors.white),
                   ),
                 ),
-
               ),
             ),
             if (_isPremium)
@@ -308,10 +291,10 @@ class _AppGridItemState extends State<AppGridItem> {
               onPressed: () async{
 
                 if (await Permission.storage.request().isGranted) {
-                 // Call the download function
+                  // Call the download function
                   _deductBalance();
                 } else {
-                ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Permission Denied')));
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Permission Denied')));
                 }
                 Navigator.of(context).pop();
                 // Add logic for premium action here
@@ -364,4 +347,3 @@ class _AppGridItemState extends State<AppGridItem> {
 
 
 }
-

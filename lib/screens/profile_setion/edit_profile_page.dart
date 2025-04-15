@@ -14,7 +14,7 @@ class EditProfilePage extends StatefulWidget {
   final String profilePic;
 
   const EditProfilePage({
-    Key? key,
+    super.key,
     required this.name,
     required this.phone,
     required this.email,
@@ -22,7 +22,7 @@ class EditProfilePage extends StatefulWidget {
     required this.address,
     required this.country,
     required this.profilePic,
-  }) : super(key: key);
+  });
 
   @override
   _EditProfilePageState createState() => _EditProfilePageState();
