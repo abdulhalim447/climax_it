@@ -5,8 +5,10 @@ import 'package:climax_it_user_app/screens/micro_job/show_job_grid.dart';
 import 'package:climax_it_user_app/screens/order_history/order_history.dart';
 import 'package:climax_it_user_app/screens/support/live_support.dart';
 import 'package:climax_it_user_app/screens/wallet_section/wallet_screen/withdraw_screen.dart';
+import 'package:climax_it_user_app/services/theme_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -38,13 +40,10 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
 
-
     _userInfo();
     _showWelcomeDialog(); // Show welcome dialog if applicable
     _showFacebookGroupDialog();
   }
-
-
 
   Future<void> _userInfo() async {
     try {
@@ -419,6 +418,31 @@ class _HomePageState extends State<HomePage> {
             },
           ),*/
           ListTile(
+            leading: Consumer<ThemeProvider>(
+              builder: (context, themeProvider, child) {
+                return Icon(
+                  themeProvider.isDarkMode ? Icons.light_mode : Icons.dark_mode,
+                );
+              },
+            ),
+            title: const Text('ডার্ক মোড'),
+            trailing: Consumer<ThemeProvider>(
+              builder: (context, themeProvider, child) {
+                return Switch(
+                  value: themeProvider.isDarkMode,
+                  onChanged: (_) {
+                    themeProvider.toggleTheme();
+                  },
+                );
+              },
+            ),
+            onTap: () {
+              final themeProvider =
+                  Provider.of<ThemeProvider>(context, listen: false);
+              themeProvider.toggleTheme();
+            },
+          ),
+          ListTile(
             leading: const Icon(Icons.security),
             title: const Text('টার্মস এন্ড কন্ডিশন'),
             onTap: () {
@@ -725,12 +749,34 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> _launchURL(String url) async {
-    final Uri uri = Uri.parse(url); // Ensure it's a valid URL format.
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri);
+    final Uri uri = Uri.parse(url);
+
+    // Special handling for telephone links
+    if (url.startsWith('tel:')) {
+      try {
+        // Use LaunchMode.externalApplication specifically for phone calls
+        await launchUrl(uri, mode: LaunchMode.externalApplication);
+      } catch (e) {
+        print('Could not launch phone dialer: $e');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Could not open phone dialer')),
+        );
+      }
     } else {
-      // If it's a web URL, fallback to opening in browser
-      await launchUrl(Uri.parse('https://www.google.com/search?q=$url'));
+      // For all other URLs
+      try {
+        if (await canLaunchUrl(uri)) {
+          await launchUrl(uri);
+        } else {
+          // Fallback to search
+          await launchUrl(Uri.parse('https://www.google.com/search?q=$url'));
+        }
+      } catch (e) {
+        print('Could not launch URL: $e');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Could not open the link')),
+        );
+      }
     }
   }
 

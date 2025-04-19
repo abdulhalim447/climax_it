@@ -1,19 +1,40 @@
 import 'package:climax_it_user_app/screens/splash_screen/splash_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_downloader/flutter_downloader.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:provider/provider.dart';
+import 'firebase_options.dart';
+import 'services/firebase_messaging_service.dart';
+import 'services/theme_provider.dart';
+import 'widgets/notification_listener.dart';
 
 import 'auth/verification/verification_service.dart';
 
 final VerificationService verificationService = VerificationService();
+final FirebaseMessagingService messagingService = FirebaseMessagingService();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   //await WalletService.fetchWalletBalance();
 
+  // Initialize Firebase
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+
+  // Initialize Firebase Messaging Service
+  await messagingService.initialize();
+
   // Wait for the verification process
   await verificationService.initialize();
   await FlutterDownloader.initialize(); // Initialize flutter_downloader
-  runApp(MyApp());
+
+  runApp(
+    ChangeNotifierProvider(
+      create: (_) => ThemeProvider(),
+      child: MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -22,77 +43,17 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
+    final themeProvider = Provider.of<ThemeProvider>(context);
+
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Climax IT',
-      theme: themeData,
-      home: SplashScreen(),
+      theme: themeProvider.getLightTheme(),
+      darkTheme: themeProvider.getDarkTheme(),
+      themeMode: themeProvider.themeMode,
+      home: PushNotificationHandler(
+        child: SplashScreen(),
+      ),
     );
   }
-
-  ThemeData themeData = ThemeData(
-    primarySwatch: Colors.blue,
-    useMaterial3: true,
-    textTheme: const TextTheme(
-      displayLarge: TextStyle(
-        fontFamily: 'AdorshoLipi',
-        fontSize: 32,
-        fontWeight: FontWeight.bold,
-      ),
-      displayMedium: TextStyle(
-        fontFamily: 'AdorshoLipi',
-        fontSize: 28,
-        fontWeight: FontWeight.w600,
-      ),
-      bodyLarge: TextStyle(
-        fontFamily: 'AdorshoLipi',
-        fontSize: 16,
-        fontWeight: FontWeight.normal,
-      ),
-      bodyMedium: TextStyle(
-        fontFamily: 'AdorshoLipi',
-        fontSize: 14,
-        fontWeight: FontWeight.normal,
-      ),
-    ),
-
-    // appBar theme ====================
-
-    appBarTheme: AppBarTheme(
-        backgroundColor: Colors.blue, foregroundColor: Colors.white),
-
-    elevatedButtonTheme: ElevatedButtonThemeData(
-      style: ButtonStyle(
-        padding: WidgetStateProperty.all(
-          EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
-        ),
-        backgroundColor: WidgetStateProperty.resolveWith((states) {
-          if (states.contains(WidgetState.pressed)) {
-            return Colors.blue; // বোতাম চাপলে ব্লু হবে
-          }
-          return Colors.blue; // ডিফল্ট কালার ব্লু
-        }),
-        textStyle: WidgetStateProperty.all(
-          TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-            fontFamily: 'AdorshoLipi', // ফন্ট ফ্যামিলি
-            color: Colors.white, // টেক্সট সাদা হবে
-          ),
-        ),
-        elevation: WidgetStateProperty.resolveWith((states) {
-          if (states.contains(WidgetState.pressed)) {
-            return 2.0; // বোতাম চাপলে উঁচুতা কম হবে
-          }
-          return 6.0; // ডিফল্ট উঁচুতা
-        }),
-        shape: WidgetStateProperty.all(
-          RoundedRectangleBorder(
-            borderRadius:
-                BorderRadius.circular(8.0), // বোতামের কোণ গুলো গোল হবে
-          ),
-        ),
-      ),
-    ),
-  );
 }

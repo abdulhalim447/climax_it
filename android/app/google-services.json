@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "819114698419",
+    "project_id": "climxit",
+    "storage_bucket": "climxit.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:819114698419:android:285abfc656fa197b0ef2c6",
+        "android_client_info": {
+          "package_name": "com.climaxit.climax_it_user_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCaTO9ixEwCb_JXbTMTmZBF1gm3wXw0f8s"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
