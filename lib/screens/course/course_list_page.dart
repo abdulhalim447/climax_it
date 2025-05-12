@@ -1,3 +1,4 @@
+import 'package:climax_it_user_app/widgets/custom_circular_indicator.dart';
 import 'package:flutter/material.dart';
 import '../../main.dart';
 import 'course_details_page.dart';
@@ -67,7 +68,7 @@ class _VideoListScreenState extends State<VideoListScreen> {
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             // Show a loading indicator while waiting for the data
-            return Center(child: CircularProgressIndicator());
+            return Center(child: CustomCircularIndicator());
           } else if (snapshot.hasError) {
             // Show an error message if the request fails
             return Center(child: Text('Failed to load videos: ${snapshot.error}'));

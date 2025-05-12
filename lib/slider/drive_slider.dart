@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:climax_it_user_app/widgets/custom_circular_indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:http/http.dart' as http;
@@ -73,7 +74,7 @@ class _DriveSliderState extends State<DriveSlider> {
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
-      return const Center(child: CircularProgressIndicator());
+      return const Center(child: CustomCircularIndicator());
     }
 
     if (_errorMessage != null) {
@@ -111,11 +112,8 @@ class _DriveSliderState extends State<DriveSlider> {
                   loadingBuilder: (context, child, loadingProgress) {
                     if (loadingProgress == null) return child;
                     return Center(
-                      child: CircularProgressIndicator(
-                        value: loadingProgress.expectedTotalBytes != null
-                            ? loadingProgress.cumulativeBytesLoaded /
-                            (loadingProgress.expectedTotalBytes ?? 1)
-                            : null,
+                      child: CustomCircularIndicator(
+                    
                       ),
                     );
                   },

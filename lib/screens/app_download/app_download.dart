@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:climax_it_user_app/widgets/custom_circular_indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:dio/dio.dart';
@@ -56,10 +57,9 @@ class _AppGridScreenState extends State<AppGridScreen> {
         title: Text('App List'),
       ),
       body: isLoading
-          ? Center(child: Transform.scale(
-          scale: 0.2, child: const CircularProgressIndicator(value: 0.5)))
+          ? Center(child: const CustomCircularIndicator())
           : GridView.builder(
-        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 2,
           crossAxisSpacing: 10.0,
           mainAxisSpacing: 10.0,
@@ -193,7 +193,7 @@ class _AppGridItemState extends State<AppGridItem> {
                     fit: BoxFit.cover,
                     placeholder: (context, url) =>
                         Transform.scale(
-                            scale: 0.2, child: const CircularProgressIndicator(value: 0.5)),
+                            scale: 0.2, child: const CustomCircularIndicator()),
                     errorWidget: (context, url, error) =>
                     const Icon(Icons.error),
                   ),

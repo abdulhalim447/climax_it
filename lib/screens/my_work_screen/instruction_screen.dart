@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:climax_it_user_app/auth/saved_login/user_session.dart';
+import 'package:climax_it_user_app/widgets/custom_circular_indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
@@ -265,9 +266,8 @@ class _InstructionScreenState extends State<InstructionScreen> {
                       ),
                     ),
                     child: _isLoading
-                        ? const CircularProgressIndicator(
-                            valueColor:
-                                AlwaysStoppedAnimation<Color>(Colors.white),
+                        ? const CustomCircularIndicator(
+                           
                           )
                         : const Text(
                             "জমা দিন",

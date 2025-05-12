@@ -1,3 +1,4 @@
+import 'package:climax_it_user_app/widgets/custom_circular_indicator.dart';
 import 'package:flutter/material.dart';
 import 'dart:convert'; // for json decoding
 import 'package:http/http.dart' as http;
@@ -52,7 +53,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
         title: Text('নোটিফিকেশন'),
       ),
       body: _isLoading
-          ? Center(child: CircularProgressIndicator())
+          ? Center(child: CustomCircularIndicator())
           : _notifications.isEmpty
           ? Center(child: Text('কোনো নোটিফিকেশন পাওয়া যায়নি'))
           : ListView.builder(

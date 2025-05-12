@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:climax_it_user_app/widgets/custom_circular_indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:climax_it_user_app/screens/shoping/product.dart';
@@ -171,7 +172,7 @@ class _CartScreenState extends State<CartScreen> {
         ],
       ),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? const Center(child: CustomCircularIndicator())
           : _cartItems.isEmpty
               ? Center(
                   child: Column(

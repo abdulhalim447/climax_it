@@ -1,3 +1,4 @@
+import 'package:climax_it_user_app/widgets/custom_circular_indicator.dart';
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
@@ -98,7 +99,7 @@ class _OrderHistoryState extends State<OrderHistory> {
         ],
       ),
       body: isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? const Center(child: CustomCircularIndicator())
           : hasError
               ? Center(
                   child: Column(

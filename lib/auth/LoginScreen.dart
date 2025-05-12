@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:climax_it_user_app/auth/SignupScreen.dart';
 import 'package:climax_it_user_app/auth/saved_login/user_session.dart';
+import 'package:climax_it_user_app/widgets/custom_circular_indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:country_code_picker/country_code_picker.dart';
@@ -242,9 +243,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                       ),
                       child: isLoading
-                          ? CircularProgressIndicator(
-                              valueColor:
-                                  AlwaysStoppedAnimation<Color>(Colors.white),
+                          ? CustomCircularIndicator(
                             )
                           : Text(
                               'Login',

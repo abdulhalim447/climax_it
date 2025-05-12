@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:climax_it_user_app/screens/shoping/CartScreen.dart';
 import 'package:climax_it_user_app/screens/shoping/product.dart';
+import 'package:climax_it_user_app/widgets/custom_circular_indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -106,7 +107,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
         context: context,
         barrierDismissible: false,
         builder: (context) => const Center(
-          child: CircularProgressIndicator(),
+          child: CustomCircularIndicator(),
         ),
       );
 
@@ -237,7 +238,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                 fit: BoxFit.cover,
                 errorWidget: (context, url, error) => const Icon(Icons.error),
                 placeholder: (context, url) => const Center(
-                  child: CircularProgressIndicator(),
+                  child: CustomCircularIndicator(),
                 ),
               ),
               const SizedBox(height: 12),
@@ -264,7 +265,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                           errorWidget: (context, url, error) =>
                               const Icon(Icons.error),
                           placeholder: (context, url) => const Center(
-                            child: CircularProgressIndicator(),
+                            child: CustomCircularIndicator(),
                           ),
                         ),
                       ),

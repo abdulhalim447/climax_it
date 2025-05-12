@@ -1,3 +1,4 @@
+import 'package:climax_it_user_app/widgets/custom_circular_indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 
@@ -89,7 +90,7 @@ class _VideoDetailPageState extends State<VideoDetailPage> {
       body: SafeArea(
         child: Center(
           child: _isLoading
-              ? CircularProgressIndicator()
+              ? CustomCircularIndicator()
               : _errorMessage != null
               ? Column(
             mainAxisAlignment: MainAxisAlignment.center,

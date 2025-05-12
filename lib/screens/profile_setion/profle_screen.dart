@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:climax_it_user_app/auth/saved_login/user_session.dart';
+import 'package:climax_it_user_app/widgets/custom_circular_indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'edit_profile_page.dart';
@@ -107,7 +108,7 @@ class _ProfilePageState extends State<ProfilePage> {
         ],
       ),
       body: isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? const Center(child: CustomCircularIndicator())
           : hasError
               ? Center(
                   child: Column(

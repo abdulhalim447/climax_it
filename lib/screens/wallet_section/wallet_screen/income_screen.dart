@@ -1,3 +1,4 @@
+import 'package:climax_it_user_app/widgets/custom_circular_indicator.dart';
 import 'package:flutter/material.dart';
 
 import '../../../auth/base_url/income_filter/income_filter_api.dart';
@@ -38,7 +39,7 @@ class _IncomeScreenState extends State<IncomeScreen> {
         appBar: AppBar(
           title: Text(widget.title),
         ),
-        body: Center(child: CircularProgressIndicator()),
+        body: Center(child: CustomCircularIndicator()),
       );
     }
 
@@ -50,7 +51,7 @@ class _IncomeScreenState extends State<IncomeScreen> {
         future: fetchIncome(userID!, widget.filter), // Pass the userID here
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator());
+            return Center(child: CustomCircularIndicator());
           } else if (snapshot.hasError) {
             return Center(child: Text('Error: ${snapshot.error}'));
           } else if (snapshot.hasData) {

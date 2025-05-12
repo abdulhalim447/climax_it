@@ -1,3 +1,4 @@
+import 'package:climax_it_user_app/widgets/custom_circular_indicator.dart';
 import 'package:flutter/material.dart';
 import 'instruction_screen.dart';
 import 'task_service.dart';
@@ -30,7 +31,7 @@ class _TaskScreenState extends State<TaskScreen> {
         future: _tasks,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
+            return const Center(child: CustomCircularIndicator());
           } else if (snapshot.hasError) {
             return Center(child: Text("Error: ${snapshot.error}"));
           } else if (snapshot.hasData) {

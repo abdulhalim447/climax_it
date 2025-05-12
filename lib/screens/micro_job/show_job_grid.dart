@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:climax_it_user_app/screens/micro_job/work_screen.dart';
+import 'package:climax_it_user_app/widgets/custom_circular_indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import '../../main.dart'; // Import main.dart to access the verificationService
@@ -48,7 +49,7 @@ class _ShowJobGridState extends State<ShowJobGrid> {
         child: isLoading
             ? Center(
                 child:
-                    CircularProgressIndicator()) // Customize loading indicator
+                    CustomCircularIndicator()) // Customize loading indicator
             : GridView.builder(
                 gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 3,

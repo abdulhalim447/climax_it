@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:climax_it_user_app/auth/saved_login/user_session.dart';
+import 'package:climax_it_user_app/widgets/custom_circular_indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
@@ -224,7 +225,7 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
                     minimumSize: const Size(double.infinity, 50),
                   ),
                   child: isLoading
-                      ? const CircularProgressIndicator(color: Colors.white)
+                      ? const CustomCircularIndicator()
                       : const Text('উইথড্র',
                           style: TextStyle(color: Colors.white)),
                 ),

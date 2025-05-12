@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:climax_it_user_app/auth/saved_login/user_session.dart';
+import 'package:climax_it_user_app/widgets/custom_circular_indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
@@ -116,7 +117,7 @@ class _ImageUploadScreenState extends State<ImageUploadScreen> {
                 }
               },
               child: _isUploading
-                  ? CircularProgressIndicator(color: Colors.white) // Show progress bar
+                  ? CustomCircularIndicator() // Show progress bar
                   : Text('Submit'),
             ),
           ],

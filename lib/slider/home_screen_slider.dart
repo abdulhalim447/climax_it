@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:climax_it_user_app/widgets/custom_circular_indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:http/http.dart' as http;
@@ -45,9 +46,8 @@ class _HomeBannerSliderState extends State<HomeBannerSlider> {
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-        List<String> newImageUrls = (data['sliders'] as List)
-            .map((image) => image as String)
-            .toList();
+        List<String> newImageUrls =
+            (data['sliders'] as List).map((image) => image as String).toList();
 
         // Save to SharedPreferences
         await _saveImages(newImageUrls);
@@ -58,7 +58,8 @@ class _HomeBannerSliderState extends State<HomeBannerSlider> {
         });
       } else {
         setState(() {
-          _errorMessage = "Failed to load images. Error: ${response.statusCode}";
+          _errorMessage =
+              "Failed to load images. Error: ${response.statusCode}";
           _isLoading = false;
         });
       }
@@ -73,12 +74,13 @@ class _HomeBannerSliderState extends State<HomeBannerSlider> {
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
-      return const Center(child: CircularProgressIndicator());
+      return const Center(child: CustomCircularIndicator());
     }
 
     if (_errorMessage != null) {
       return Center(
-          child: Text(_errorMessage!, style: const TextStyle(color: Colors.red)));
+          child:
+              Text(_errorMessage!, style: const TextStyle(color: Colors.red)));
     }
 
     if (_imageUrls.isEmpty) {
@@ -111,12 +113,7 @@ class _HomeBannerSliderState extends State<HomeBannerSlider> {
                   loadingBuilder: (context, child, loadingProgress) {
                     if (loadingProgress == null) return child;
                     return Center(
-                      child: CircularProgressIndicator(
-                        value: loadingProgress.expectedTotalBytes != null
-                            ? loadingProgress.cumulativeBytesLoaded /
-                            (loadingProgress.expectedTotalBytes ?? 1)
-                            : null,
-                      ),
+                      child: CustomCircularIndicator(),
                     );
                   },
                   errorBuilder: (context, error, stackTrace) {

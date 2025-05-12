@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:climax_it_user_app/screens/shoping/product.dart';
+import 'package:climax_it_user_app/widgets/custom_circular_indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -120,9 +121,8 @@ class _ProductItemState extends State<ProductItem> {
                       placeholder: (context, url) => Container(
                         color: Colors.grey[200],
                         child: Center(
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: Theme.of(context).primaryColor,
+                          child: CustomCircularIndicator(
+                          
                           ),
                         ),
                       ),

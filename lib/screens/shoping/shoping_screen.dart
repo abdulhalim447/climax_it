@@ -1,5 +1,6 @@
 import 'package:climax_it_user_app/screens/shoping/favourite_Screen.dart';
 import 'package:climax_it_user_app/screens/shoping/product.dart';
+import 'package:climax_it_user_app/widgets/custom_circular_indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -167,7 +168,7 @@ class _ShoppingScreenState extends State<ShoppingScreen> {
                   return Center(
                     child: Padding(
                       padding: EdgeInsets.all(20),
-                      child: CircularProgressIndicator(),
+                      child: CustomCircularIndicator(),
                     ),
                   );
                 }

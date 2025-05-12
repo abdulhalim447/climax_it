@@ -6,6 +6,7 @@ import 'package:climax_it_user_app/screens/order_history/order_history.dart';
 import 'package:climax_it_user_app/screens/support/live_support.dart';
 import 'package:climax_it_user_app/screens/wallet_section/wallet_screen/withdraw_screen.dart';
 import 'package:climax_it_user_app/services/theme_provider.dart';
+import 'package:climax_it_user_app/widgets/custom_circular_indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
@@ -36,6 +37,13 @@ String name = "";
 String email = "";
 
 class _HomePageState extends State<HomePage> {
+  // Add a refresh key to control the RefreshIndicator
+  final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey =
+      GlobalKey<RefreshIndicatorState>();
+
+  // Add a flag to track if currently refreshing
+  bool _isRefreshing = false;
+
   @override
   void initState() {
     super.initState();
@@ -134,6 +142,48 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  // Add a refresh method that updates data
+  Future<void> _refreshHomeData() async {
+    if (_isRefreshing) return;
+
+    setState(() {
+      _isRefreshing = true;
+    });
+
+    try {
+      // Refresh user info
+      await _userInfo();
+
+      // Add any other data refresh logic here
+      // Example: Refresh slider data, notifications, etc.
+
+      // Show a success message
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('তথ্য হালনাগাদ করা হয়েছে!'),
+          duration: Duration(seconds: 2),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } catch (e) {
+      // Show error message if refresh fails
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('তথ্য হালনাগাদ করা যায়নি। আবার চেষ্টা করুন।'),
+          duration: Duration(seconds: 2),
+          backgroundColor: Colors.red,
+        ),
+      );
+      print("Error refreshing data: $e");
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isRefreshing = false;
+        });
+      }
+    }
+  }
+
 // Main section of the screen================================================
 
   @override
@@ -144,22 +194,32 @@ class _HomePageState extends State<HomePage> {
       drawer: _buildDrawer(context),
 
       // main body
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: const EdgeInsets.only(top: 8.0),
-              child: HomeBannerSlider(),
-            ),
-            _idVerificationSection(),
-            // সার্ভিস সমূহ
-            _buildSectionTitle('সার্ভিস সমূহ'),
-            _buildServiceGrid(context),
-            // আসন্ন ফিচার সমূহ
-            _buildSectionTitle('আসন্ন ফিচার-সমূহ'),
-            _buildUpcomingFeatureGrid(),
-          ],
+      body: RefreshIndicator(
+        key: _refreshIndicatorKey,
+        onRefresh: _refreshHomeData,
+        color: Colors.blue,
+        backgroundColor: Theme.of(context).cardColor,
+        displacement: 40.0,
+        strokeWidth: 3.0,
+        child: SingleChildScrollView(
+          physics:
+              AlwaysScrollableScrollPhysics(), // Important for RefreshIndicator to work
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(top: 8.0),
+                child: HomeBannerSlider(),
+              ),
+              _idVerificationSection(),
+              // সার্ভিস সমূহ
+              _buildSectionTitle('সার্ভিস সমূহ'),
+              _buildServiceGrid(context),
+              // আসন্ন ফিচার সমূহ
+              _buildSectionTitle('আসন্ন ফিচার-সমূহ'),
+              _buildUpcomingFeatureGrid(),
+            ],
+          ),
         ),
       ),
       floatingActionButton: FloatingActionButton(
@@ -189,6 +249,15 @@ class _HomePageState extends State<HomePage> {
 
       // ডানপাশে আইকনগুলো
       actions: [
+        // Manual refresh button
+        IconButton(
+          icon: const Icon(Icons.refresh),
+          onPressed: () {
+            _refreshIndicatorKey.currentState
+                ?.show(); // Trigger refresh programmatically
+          },
+        ),
+
         // নোটিফিকেশন আইকন
         IconButton(
           icon: const Icon(Icons.notifications),
@@ -226,7 +295,7 @@ class _HomePageState extends State<HomePage> {
               ]),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
-                  return Center(child: CircularProgressIndicator());
+                  return Center(child: CustomCircularIndicator());
                 } else if (snapshot.hasError) {
                   return Center(
                     child: Text(
@@ -240,64 +309,58 @@ class _HomePageState extends State<HomePage> {
                   final referCode = data[1] ?? "No Refer Code";
                   final profilepic = data[2] ?? "No Refer Code";
 
-                  return Padding(
-                    padding: const EdgeInsets.only(left: 16.0),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        CircleAvatar(
-                          radius: 40,
-                          backgroundImage: NetworkImage(
-                            'https://climaxitbd.com/php/profile/$profilepic',
-                          ),
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      CircleAvatar(
+                        radius: 40,
+                        backgroundImage: NetworkImage(
+                          'https://climaxitbd.com/php/profile/$profilepic',
                         ),
-                        SizedBox(height: 8),
-                        Text(
-                          name + (verificationService.isVerified ? ' *️⃣' : ''),
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                          ),
+                      ),
+                      SizedBox(height: 8),
+                      Text(
+                        name + (verificationService.isVerified ? ' *️⃣' : ''),
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
                         ),
-                        Flexible(
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Flexible(
-                                child: Text(
-                                  'রেফার কোড: $referCode',
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 10,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                  overflow: TextOverflow.ellipsis,
-                                ),
+                      ),
+                      Row(
+                        children: [
+                          Flexible(
+                            child: Text(
+                              'রেফার কোড: $referCode',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
                               ),
-                              SizedBox(width: 8),
-                              GestureDetector(
-                                onTap: () {
-                                  Clipboard.setData(
-                                      ClipboardData(text: referCode));
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text('রেফার কোড কপি হয়েছে!'),
-                                      duration: Duration(seconds: 2),
-                                    ),
-                                  );
-                                },
-                                child: Icon(
-                                  Icons.copy,
-                                  size: 18,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ],
+                              overflow: TextOverflow.ellipsis,
+                            ),
                           ),
-                        ),
-                      ],
-                    ),
+                          SizedBox(width: 8),
+                          GestureDetector(
+                            onTap: () {
+                              Clipboard.setData(
+                                  ClipboardData(text: referCode));
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text('রেফার কোড কপি হয়েছে!'),
+                                  duration: Duration(seconds: 2),
+                                ),
+                              );
+                            },
+                            child: Icon(
+                              Icons.copy,
+                              size: 18,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
                   );
                 }
               },
@@ -663,9 +726,9 @@ class _HomePageState extends State<HomePage> {
         itemCount: services.length,
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 3,
-          //childAspectRatio: 0.8,
-          // mainAxisSpacing: 5,      // উপরে নিচে স্পেসিং কমানো
-          // crossAxisSpacing: 5,
+          mainAxisSpacing: 16,
+          crossAxisSpacing: 16,
+          childAspectRatio: 0.85,
         ),
         itemBuilder: (context, index) {
           final item = services[index];
@@ -676,25 +739,43 @@ class _HomePageState extends State<HomePage> {
                 MaterialPageRoute(builder: (context) => screens[index]),
               );
             },
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                CircleAvatar(
-                  radius: 24,
-                  backgroundColor: Colors.blue,
-                  child: Image.asset(
-                    item["icon"] ?? "",
-                    width: 30,
-                    height: 30,
+            child: AnimatedContainer(
+              duration: Duration(milliseconds: 150),
+              decoration: BoxDecoration(
+                color: Colors.blue.shade50,
+                borderRadius: BorderRadius.circular(18),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.withOpacity(0.12),
+                    blurRadius: 8,
+                    offset: Offset(0, 4),
                   ),
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  item["label"] ?? "",
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(fontSize: 12),
-                ),
-              ],
+                ],
+              ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  CircleAvatar(
+                    radius: 28,
+                    backgroundColor: Colors.blue,
+                    child: Image.asset(
+                      item["icon"] ?? "",
+                      width: 36,
+                      height: 36,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    item["label"] ?? "",
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.black87,
+                    ),
+                  ),
+                ],
+              ),
             ),
           );
         },
@@ -720,28 +801,47 @@ class _HomePageState extends State<HomePage> {
         itemCount: upcomingFeatures.length,
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 3,
-          //childAspectRatio: 0.8,
+          mainAxisSpacing: 16,
+          crossAxisSpacing: 16,
+          childAspectRatio: 0.85,
         ),
         itemBuilder: (context, index) {
           final item = upcomingFeatures[index];
-          return Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              CircleAvatar(
-                radius: 24,
-                backgroundColor: Colors.blue,
-                child: Text(
-                  item["icon"] ?? "",
-                  style: const TextStyle(fontSize: 20),
+          return Container(
+            decoration: BoxDecoration(
+              color: Colors.blue.shade50,
+              borderRadius: BorderRadius.circular(18),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.grey.withOpacity(0.10),
+                  blurRadius: 6,
+                  offset: Offset(0, 3),
                 ),
-              ),
-              const SizedBox(height: 6),
-              Text(
-                item["label"] ?? "",
-                textAlign: TextAlign.center,
-                style: const TextStyle(fontSize: 12),
-              ),
-            ],
+              ],
+            ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                CircleAvatar(
+                  radius: 26,
+                  backgroundColor: Colors.blue,
+                  child: Text(
+                    item["icon"] ?? "",
+                    style: const TextStyle(fontSize: 22, color: Colors.white),
+                  ),
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  item["label"] ?? "",
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.black87,
+                  ),
+                ),
+              ],
+            ),
           );
         },
       ),

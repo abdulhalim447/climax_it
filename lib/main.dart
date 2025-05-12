@@ -1,4 +1,5 @@
 import 'package:climax_it_user_app/screens/splash_screen/splash_screen.dart';
+import 'package:climax_it_user_app/widgets/custom_circular_indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -50,7 +51,6 @@ class MyApp extends StatelessWidget {
       title: 'Climax IT',
       theme: themeProvider.getLightTheme(),
       darkTheme: themeProvider.getDarkTheme(),
-      themeMode: themeProvider.themeMode,
       home: PushNotificationHandler(
         child: SplashScreen(),
       ),

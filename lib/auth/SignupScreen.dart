@@ -1,4 +1,6 @@
 import 'package:climax_it_user_app/auth/LoginScreen.dart';
+import 'package:climax_it_user_app/screens/youtube_player_screen.dart';
+import 'package:climax_it_user_app/widgets/custom_circular_indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:country_code_picker/country_code_picker.dart';
@@ -353,10 +355,7 @@ class _SignupScreenState extends State<SignupScreen> {
                         ),
                       ),
                       child: isLoading
-                          ? CircularProgressIndicator(
-                              valueColor:
-                                  AlwaysStoppedAnimation<Color>(Colors.white),
-                            )
+                          ? CustomCircularIndicator()
                           : Text(
                               'Register',
                               style:
@@ -383,6 +382,44 @@ class _SignupScreenState extends State<SignupScreen> {
                         ),
                       ),
                     ],
+                  ),
+
+                  // Add a separator line
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 16.0),
+                    child: Divider(thickness: 1.0),
+                  ),
+
+                  // How to Register button
+                  OutlinedButton.icon(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => YouTubePlayerScreen(
+                            videoUrl:
+                                'https://www.youtube.com/watch?v=ERrggnxDcfo', // Registration tutorial video
+                            title: 'রেজিস্ট্রেশন প্রক্রিয়া',
+                          ),
+                        ),
+                      );
+                    },
+                    icon: Icon(Icons.play_circle_outline, color: Colors.red),
+                    label: Text(
+                      'কিভাবে রেজিস্ট্রেশন করবেন?',
+                      style: TextStyle(
+                        color: Colors.red[700],
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    style: OutlinedButton.styleFrom(
+                      side: BorderSide(color: Colors.red.shade300),
+                      padding:
+                          EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8.0),
+                      ),
+                    ),
                   ),
                 ],
               ),

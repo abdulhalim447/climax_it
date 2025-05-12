@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:climax_it_user_app/widgets/custom_circular_indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:http/http.dart' as http;
@@ -126,7 +127,7 @@ class AppGridItem extends StatelessWidget {
                 width: double.infinity,
                 fit: BoxFit.cover,
                 placeholder: (context, url) => Transform.scale(
-                    scale: 0.2, child: const CircularProgressIndicator(value: 0.5)),
+                    scale: 0.2, child: const CustomCircularIndicator()),
                 errorWidget: (context, url, error) => const Icon(Icons.error),
               ),
             ),

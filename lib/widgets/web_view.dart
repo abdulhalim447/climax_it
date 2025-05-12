@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:climax_it_user_app/auth/saved_login/user_session.dart';
+import 'package:climax_it_user_app/widgets/custom_circular_indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:webview_flutter/webview_flutter.dart';
@@ -79,8 +80,6 @@ class _PaymentWebViewState extends State<PaymentWebView> {
     }
   }
 
-
-
   Future<void> insertHistory() async {
     final String? userID = await UserSession.getUserID();
 
@@ -108,7 +107,6 @@ class _PaymentWebViewState extends State<PaymentWebView> {
     final result = jsonDecode(response.body);
     print(result["message"]);
   }
-
 
   @override
   void initState() {
@@ -189,7 +187,7 @@ class _PaymentWebViewState extends State<PaymentWebView> {
           WebViewWidget(controller: _controller),
           if (_isLoading)
             const Center(
-              child: CircularProgressIndicator(), // লোডিং ইনডিকেটর
+              child: CustomCircularIndicator(), // লোডিং ইনডিকেটর
             ),
         ],
       ),

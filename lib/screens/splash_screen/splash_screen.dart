@@ -1,7 +1,9 @@
 import 'package:climax_it_user_app/auth/LoginScreen.dart';
 import 'package:climax_it_user_app/bottom_navigation/MainNavigationScreen.dart';
+import 'package:climax_it_user_app/widgets/custom_circular_indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:climax_it_user_app/auth/saved_login/user_session.dart';
+import 'package:climax_it_user_app/widgets/custom_circular_indicator.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -13,7 +15,8 @@ class SplashScreen extends StatefulWidget {
 class _SplashScreenState extends State<SplashScreen> {
   Future<void> _checkLoginStatus() async {
     await Future.delayed(const Duration(seconds: 2)); // Splash delay
-    String? token = await UserSession.getToken(); // Get token from SharedPreferences
+    String? token =
+        await UserSession.getToken(); // Get token from SharedPreferences
 
     if (token != null && token.isNotEmpty) {
       // If token exists, navigate to MainNavigationScreen
@@ -48,7 +51,7 @@ class _SplashScreenState extends State<SplashScreen> {
               Spacer(),
               Image.asset('assets/images/logo.png', height: 250, width: 250),
               Spacer(),
-              CircularProgressIndicator(),
+              CustomCircularIndicator(),
               SizedBox(height: 10),
               Text(
                 "Version 1.0.0",

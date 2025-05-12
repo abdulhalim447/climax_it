@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:climax_it_user_app/widgets/custom_circular_indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
@@ -1002,7 +1003,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             Container(
               color: Colors.black.withOpacity(0.5),
               child: const Center(
-                child: CircularProgressIndicator(),
+                child: CustomCircularIndicator(),
               ),
             ),
         ],

@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:climax_it_user_app/auth/saved_login/user_session.dart';
+import 'package:climax_it_user_app/widgets/custom_circular_indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:webview_flutter/webview_flutter.dart';
@@ -137,7 +138,7 @@ class _DonationPayState extends State<DonationPay> {
           WebViewWidget(controller: _controller),
           if (_isLoading)
             const Center(
-              child: CircularProgressIndicator(), // লোডিং ইনডিকেটর
+              child: CustomCircularIndicator(), // লোডিং ইনডিকেটর
             ),
         ],
       ),
