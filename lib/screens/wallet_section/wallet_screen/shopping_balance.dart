@@ -55,7 +55,7 @@ class _ShoppingBalanceState extends State<ShoppingBalance> {
           shoppingWalletBalance = "৳${responseData['balance']}";
         });
       } else {
-        _showMessage(responseData['message']);
+        //_showMessage(responseData['message']);
       }
     } catch (e) {
       _showMessage("ব্যালেন্স লোড করা সম্ভব হয়নি!");

@@ -6,8 +6,9 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
 
-import '../../main.dart';
+import '../../providers/verification_provider.dart';
 
 class InstructionScreen extends StatefulWidget {
   final Map<String, dynamic> task;
@@ -239,21 +240,17 @@ class _InstructionScreenState extends State<InstructionScreen> {
                     onPressed: _isLoading
                         ? null
                         : () {
-                            if (verificationService.isVerified) {
+                            final verificationProvider =
+                                Provider.of<VerificationProvider>(context,
+                                    listen: false);
+                            if (verificationProvider.isVerified) {
                               _submitTask();
                             } else {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(
-                                    "আপনার একাউন্ট ভেরিফাইড নয়। একাউট ভেরিফাই করুন । ধন্যবাদ",
-                                    style: TextStyle(
-                                        color: Colors.white), // Text color
-                                  ),
-                                  backgroundColor:
-                                      Colors.red, // Red background color
-                                  duration: Duration(
-                                      seconds: 3), // Duration for visibility
-                                ),
+                              verificationProvider.requireVerification(
+                                context,
+                                message:
+                                    "আপনার একাউন্ট ভেরিফাইড নয়। একাউট ভেরিফাই করুন । ধন্যবাদ",
+                                showDialog: true,
                               );
                             }
                           },
@@ -266,9 +263,7 @@ class _InstructionScreenState extends State<InstructionScreen> {
                       ),
                     ),
                     child: _isLoading
-                        ? const CustomCircularIndicator(
-                           
-                          )
+                        ? const CustomCircularIndicator()
                         : const Text(
                             "জমা দিন",
                             style: TextStyle(fontSize: 16, color: Colors.white),

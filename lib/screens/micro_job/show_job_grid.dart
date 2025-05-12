@@ -3,7 +3,8 @@ import 'package:climax_it_user_app/screens/micro_job/work_screen.dart';
 import 'package:climax_it_user_app/widgets/custom_circular_indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import '../../main.dart'; // Import main.dart to access the verificationService
+import 'package:provider/provider.dart';
+import '../../providers/verification_provider.dart';
 
 class ShowJobGrid extends StatefulWidget {
   const ShowJobGrid({super.key});
@@ -48,8 +49,7 @@ class _ShowJobGridState extends State<ShowJobGrid> {
         padding: const EdgeInsets.all(8.0),
         child: isLoading
             ? Center(
-                child:
-                    CustomCircularIndicator()) // Customize loading indicator
+                child: CustomCircularIndicator()) // Customize loading indicator
             : GridView.builder(
                 gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 3,

@@ -6,6 +6,8 @@ import 'package:http/http.dart' as http;
 import 'package:climax_it_user_app/screens/shoping/product.dart';
 import '../../auth/saved_login/user_session.dart';
 import '../../main.dart';
+import 'package:provider/provider.dart';
+import '../../providers/verification_provider.dart';
 
 class CheckoutScreen extends StatefulWidget {
   final Product product;
@@ -40,14 +42,70 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 
   // Dummy data for dropdowns
   final List<String> districts = [
-    'ঢাকা', 'ফরিদপুর', 'গাজীপুর', 'গোপালগঞ্জ', 'কিশোরগঞ্জ', 'মাদারীপুর', 'মানিকগঞ্জ', 'মুন্সিগঞ্জ', 'নারায়ণগঞ্জ', 'নরসিংদী', 'রাজবাড়ী', 'শরীয়তপুর', 'টাঙ্গাইল',
-    'চট্টগ্রাম', 'বান্দরবান', 'ব্রাহ্মণবাড়িয়া', 'চাঁদপুর', 'কুমিল্লা', 'কক্সবাজার', 'ফেনী', 'খাগড়াছড়ি', 'লক্ষ্মীপুর', 'নোয়াখালী', 'রাঙামাটি',
-    'রাজশাহী', 'বগুড়া', 'জয়পুরহাট', 'নওগাঁ', 'নাটোর', 'চাঁপাইনবাবগঞ্জ', 'পাবনা', 'সিরাজগঞ্জ',
-    'খুলনা', 'বাগেরহাট', 'চুয়াডাঙ্গা', 'যশোর', 'ঝিনাইদহ', 'কুষ্টিয়া', 'মাগুরা', 'মেহেরপুর', 'নড়াইল', 'সাতক্ষীরা',
-    'বরিশাল', 'বরগুনা', 'ভোলা', 'ঝালকাঠি', 'পটুয়াখালী', 'পিরোজপুর',
-    'সিলেট', 'হবিগঞ্জ', 'মৌলভীবাজার', 'সুনামগঞ্জ',
-    'ময়মনসিংহ', 'জামালপুর', 'নেত্রকোণা', 'শেরপুর',
-    'রংপুর', 'দিনাজপুর', 'গাইবান্ধা', 'কুড়িগ্রাম', 'লালমনিরহাট', 'নীলফামারী', 'পঞ্চগড়', 'ঠাকুরগাঁও'
+    'ঢাকা',
+    'ফরিদপুর',
+    'গাজীপুর',
+    'গোপালগঞ্জ',
+    'কিশোরগঞ্জ',
+    'মাদারীপুর',
+    'মানিকগঞ্জ',
+    'মুন্সিগঞ্জ',
+    'নারায়ণগঞ্জ',
+    'নরসিংদী',
+    'রাজবাড়ী',
+    'শরীয়তপুর',
+    'টাঙ্গাইল',
+    'চট্টগ্রাম',
+    'বান্দরবান',
+    'ব্রাহ্মণবাড়িয়া',
+    'চাঁদপুর',
+    'কুমিল্লা',
+    'কক্সবাজার',
+    'ফেনী',
+    'খাগড়াছড়ি',
+    'লক্ষ্মীপুর',
+    'নোয়াখালী',
+    'রাঙামাটি',
+    'রাজশাহী',
+    'বগুড়া',
+    'জয়পুরহাট',
+    'নওগাঁ',
+    'নাটোর',
+    'চাঁপাইনবাবগঞ্জ',
+    'পাবনা',
+    'সিরাজগঞ্জ',
+    'খুলনা',
+    'বাগেরহাট',
+    'চুয়াডাঙ্গা',
+    'যশোর',
+    'ঝিনাইদহ',
+    'কুষ্টিয়া',
+    'মাগুরা',
+    'মেহেরপুর',
+    'নড়াইল',
+    'সাতক্ষীরা',
+    'বরিশাল',
+    'বরগুনা',
+    'ভোলা',
+    'ঝালকাঠি',
+    'পটুয়াখালী',
+    'পিরোজপুর',
+    'সিলেট',
+    'হবিগঞ্জ',
+    'মৌলভীবাজার',
+    'সুনামগঞ্জ',
+    'ময়মনসিংহ',
+    'জামালপুর',
+    'নেত্রকোণা',
+    'শেরপুর',
+    'রংপুর',
+    'দিনাজপুর',
+    'গাইবান্ধা',
+    'কুড়িগ্রাম',
+    'লালমনিরহাট',
+    'নীলফামারী',
+    'পঞ্চগড়',
+    'ঠাকুরগাঁও'
   ];
 
   final Map<String, List<String>> districtUpazilas = {
@@ -749,11 +807,12 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                                       keyboardType: TextInputType.number,
                                       decoration: InputDecoration(
                                         hintText: 'রিসেলার বিক্রয় মূল্য',
-                                        hintStyle: TextStyle(fontSize: 9), // Set the font size here
+                                        hintStyle: TextStyle(
+                                            fontSize:
+                                                9), // Set the font size here
                                         border: OutlineInputBorder(),
                                       ),
                                     ),
-
                                   ),
                                   SizedBox(width: 10),
                                   Expanded(
@@ -1014,23 +1073,21 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           onPressed: _isLoading
               ? null
               : () {
-            if (verificationService.isVerified) {
-              // Your existing logic for button press
-              _deductBalance();
-            } else {
-              // Show SnackBar if the account is not verified
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(
-                    "আপনার একাউন্ট ভেরিফাইড নয়। একাউট ভেরিফাই করুন । ধন্যবাদ",
-                    style: TextStyle(color: Colors.white), // Text color
-                  ),
-                  backgroundColor: Colors.red, // Red background color
-                  duration: Duration(seconds: 3), // Duration for visibility
-                ),
-              );
-            }
-          },
+                  final verificationProvider =
+                      Provider.of<VerificationProvider>(context, listen: false);
+                  if (verificationProvider.isVerified) {
+                    // Your existing logic for button press
+                    _deductBalance();
+                  } else {
+                    // Show SnackBar if the account is not verified
+                    verificationProvider.requireVerification(
+                      context,
+                      message:
+                          "আপনার একাউন্ট ভেরিফাইড নয়। একাউট ভেরিফাই করুন । ধন্যবাদ",
+                      showDialog: true,
+                    );
+                  }
+                },
           style: ElevatedButton.styleFrom(
             padding: const EdgeInsets.symmetric(vertical: 16),
             shape: RoundedRectangleBorder(
@@ -1131,11 +1188,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     double amount = double.tryParse(total.toString()) ?? 0.0;
     try {
       var response = await http.post(
-
-        Uri.parse("https://climaxitbd.com/php/wallet/decrease-shop-balance.php"),
+        Uri.parse(
+            "https://climaxitbd.com/php/wallet/decrease-shop-balance.php"),
         headers: {"Content-Type": "application/json"},
-
-
         body: jsonEncode({
           "user_id": userId,
           "action": "deduct_balance",
@@ -1146,7 +1201,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       var responseData = jsonDecode(response.body);
       if (responseData['status'] == "success") {
         _processOrder();
-
       } else {
         _showMessage(responseData['message']);
       }
@@ -1161,7 +1215,4 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       SnackBar(content: Text(message)),
     );
   }
-
-
-
 }

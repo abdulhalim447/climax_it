@@ -1,3 +1,4 @@
+import 'package:climax_it_user_app/providers/verification_provider.dart';
 import 'package:climax_it_user_app/screens/splash_screen/splash_screen.dart';
 import 'package:climax_it_user_app/widgets/custom_circular_indicator.dart';
 import 'package:flutter/material.dart';
@@ -9,9 +10,7 @@ import 'services/firebase_messaging_service.dart';
 import 'services/theme_provider.dart';
 import 'widgets/notification_listener.dart';
 
-import 'auth/verification/verification_service.dart';
-
-final VerificationService verificationService = VerificationService();
+// Remove the global verification service
 final FirebaseMessagingService messagingService = FirebaseMessagingService();
 
 void main() async {
@@ -26,13 +25,15 @@ void main() async {
   // Initialize Firebase Messaging Service
   await messagingService.initialize();
 
-  // Wait for the verification process
-  await verificationService.initialize();
+  // No need to initialize verification service here
   await FlutterDownloader.initialize(); // Initialize flutter_downloader
 
   runApp(
-    ChangeNotifierProvider(
-      create: (_) => ThemeProvider(),
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => ThemeProvider()),
+        ChangeNotifierProvider(create: (_) => VerificationProvider()),
+      ],
       child: MyApp(),
     ),
   );

@@ -1,8 +1,10 @@
 import 'dart:convert';
 
+import 'package:climax_it_user_app/providers/verification_provider.dart';
 import 'package:climax_it_user_app/screens/wallet_section/wallet_screen/pay_webview/shopping_pay.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
 
 import '../../../auth/saved_login/user_session.dart';
 import '../../../widgets/web_view.dart';
@@ -26,7 +28,7 @@ class _AddShoppingBalanceState extends State<AddShoppingBalance> {
   @override
   void initState() {
     super.initState();
-   _userInfo();
+    _userInfo();
   }
 
   Future<void> _userInfo() async {
@@ -54,16 +56,11 @@ class _AddShoppingBalanceState extends State<AddShoppingBalance> {
     }
   }
 
-
-
-
-
   @override
   void dispose() {
     _amountController.dispose(); // Dispose the controller when not needed
     super.dispose();
   }
-
 
   ///for payment
   Future<void> createCheckout({
@@ -87,7 +84,7 @@ class _AddShoppingBalanceState extends State<AddShoppingBalance> {
       "return_type": "GET",
       "cancel_url": "${baseURL}cancel.php",
       "webhook_url":
-      "https://pay.climaxitbd.com/callback/ae673c586c0a56ce5c10a304bd1c26e0cd87d120"
+          "https://pay.climaxitbd.com/callback/ae673c586c0a56ce5c10a304bd1c26e0cd87d120"
       // webhook ====
     };
 
@@ -111,8 +108,9 @@ class _AddShoppingBalanceState extends State<AddShoppingBalance> {
           context,
           MaterialPageRoute(
               builder: (context) => ShoppingPay(
-                paymentUrl: data['payment_url'], amount: _amountController.text,
-              )),
+                    paymentUrl: data['payment_url'],
+                    amount: _amountController.text,
+                  )),
         );
       } else {
         print("Error: ${response.body}");
@@ -121,11 +119,6 @@ class _AddShoppingBalanceState extends State<AddShoppingBalance> {
       print("Exception: $e");
     }
   }
-
-
-
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -187,24 +180,38 @@ class _AddShoppingBalanceState extends State<AddShoppingBalance> {
               SizedBox(height: 20),
               SizedBox(
                 width: double.maxFinite,
-                child: ElevatedButton(
-                  onPressed: () async {
-                    createCheckout(
-                        fullName: name,
-                        email: email,
-                        amount: _amountController.text,
-                        userId: userId,
-                        orderId: '');
+                child: Consumer<VerificationProvider>(
+                  builder: (context, verificationProvider, _) {
+                    return ElevatedButton(
+                      onPressed: () {
+                        if (verificationProvider.isVerified) {
+                          createCheckout(
+                              fullName: name,
+                              email: email,
+                              amount: _amountController.text,
+                              userId: userId,
+                              orderId: '');
+                        } else {
+                          verificationProvider.requireVerification(
+                            context,
+                            message:
+                                "আপনার একাউন্ট ভেরিফাইড নয়। একাউট ভেরিফাই করুন । ধন্যবাদ",
+                            showDialog: true,
+                          );
+                        }
+                      },
+                      style: ElevatedButton.styleFrom(
+                        padding: EdgeInsets.symmetric(vertical: 15),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10)),
+                        backgroundColor: Colors.blue, // Button color
+                        shadowColor: Colors.blueAccent, // Shadow color
+                        elevation: 5, // Elevation for shadow
+                      ),
+                      child: Text('পেমেন্ট করুন',
+                          style: TextStyle(color: Colors.white)),
+                    );
                   },
-                  style: ElevatedButton.styleFrom(
-                    padding: EdgeInsets.symmetric(vertical: 15),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10)),
-                    backgroundColor: Colors.blue, // Button color
-                    shadowColor: Colors.blueAccent, // Shadow color
-                    elevation: 5, // Elevation for shadow
-                  ),
-                  child: Text('পেমেন্ট করুন', style: TextStyle(color: Colors.white),),
                 ),
               ),
             ],

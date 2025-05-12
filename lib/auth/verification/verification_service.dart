@@ -3,53 +3,103 @@ import 'package:http/http.dart' as http;
 import '../saved_login/user_session.dart';
 
 class VerificationService {
-  bool isVerified = false;
-  String userId = "";
-  String name = "";
-  String email = "";
+  // Base URL for API calls
+  static const String _baseUrl = "https://climaxitbd.com/php";
 
-  // Add the initialize method
-  Future<void> initialize() async {
-    await _userInfo();
-    if (userId.isNotEmpty) {
-      await _checkUserVerification();
-    }
-  }
-
-  Future<void> _userInfo() async {
+  // Check user verification status
+  Future<bool> checkVerification() async {
     try {
-      String? fetchedUserId = await UserSession.getUserID();
-      String? fetchedEmail = await UserSession.getEmail();
-      String? fetchedName = await UserSession.getName();
+      String? userId = await UserSession.getUserID();
 
-      if (fetchedUserId != null && fetchedEmail != null && fetchedName != null) {
-        userId = fetchedUserId;
-        email = fetchedEmail;
-        name = fetchedName;
+      if (userId == null || userId.isEmpty) {
+        return false;
       }
-    } catch (e) {
-      print("Error fetching user info: $e");
-    }
-  }
 
-  Future<void> _checkUserVerification() async {
-    try {
-      final response = await http.get(Uri.parse(
-          "https://climaxitbd.com/php/wallet/check_user_verify.php?user_id=$userId"));
+      final response = await http.get(
+          Uri.parse("$_baseUrl/wallet/check_user_verify.php?user_id=$userId"));
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
 
         if (data.containsKey("isVarified")) {
-          int verificationStatus = int.tryParse(data["isVarified"].toString()) ?? 0;
-          isVerified = verificationStatus == 1;
+          int verificationStatus =
+              int.tryParse(data["isVarified"].toString()) ?? 0;
+          return verificationStatus == 1;
         }
-      } else {
-        isVerified = false;
       }
+
+      return false;
     } catch (e) {
       print("Error checking verification: $e");
-      isVerified = false;
+      return false;
+    }
+  }
+
+  // Initiate verification process with payment
+  Future<String?> initiateVerification(
+      String fullName, String email, String amount, String userId) async {
+    const String baseURL = "https://pay.climaxitbd.com/";
+    const String apiKey = "58c3af0decc37110a275a8ecabc4d68d6955fc80";
+
+    final Uri url = Uri.parse("${baseURL}api/checkout-v2");
+
+    final Map<String, dynamic> fields = {
+      "full_name": fullName,
+      "email": email,
+      "amount": amount,
+      "metadata": {"user_id": userId, "order_id": "verification"},
+      "redirect_url": "${baseURL}success.php",
+      "return_type": "GET",
+      "cancel_url": "${baseURL}cancel.php",
+      "webhook_url":
+          "https://pay.climaxitbd.com/callback/ae673c586c0a56ce5c10a304bd1c26e0cd87d120"
+    };
+
+    try {
+      final response = await http.post(
+        url,
+        headers: {
+          "RT-UDDOKTAPAY-API-KEY": apiKey,
+          "Accept": "application/json",
+          "Content-Type": "application/json"
+        },
+        body: jsonEncode(fields),
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return data['payment_url'];
+      } else {
+        print("Error initiating verification: ${response.body}");
+        return null;
+      }
+    } catch (e) {
+      print("Exception during verification: $e");
+      return null;
+    }
+  }
+
+  // Update user verification status (e.g., after successful payment)
+  Future<bool> updateVerificationStatus(String userId,
+      {bool verified = true}) async {
+    try {
+      final url = Uri.parse('$_baseUrl/wallet/verify_pay.php');
+
+      Map<String, dynamic> data = {
+        'user_id': userId,
+        'shopping_wallet_balance': "0",
+        'isVarified': verified ? "1" : "0",
+      };
+
+      final response = await http.post(url, body: json.encode(data), headers: {
+        'Content-Type': 'application/json',
+      });
+
+      final responseData = json.decode(response.body);
+      return responseData['status'] == 'success';
+    } catch (e) {
+      print("Error updating verification status: $e");
+      return false;
     }
   }
 }

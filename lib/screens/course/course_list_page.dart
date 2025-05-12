@@ -1,6 +1,7 @@
 import 'package:climax_it_user_app/widgets/custom_circular_indicator.dart';
 import 'package:flutter/material.dart';
-import '../../main.dart';
+import 'package:provider/provider.dart';
+import '../../providers/verification_provider.dart';
 import 'course_details_page.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -19,8 +20,6 @@ class VideoItem {
   });
 }
 
-
-
 class VideoListScreen extends StatefulWidget {
   const VideoListScreen({super.key});
 
@@ -37,26 +36,27 @@ class _VideoListScreenState extends State<VideoListScreen> {
     videoList = fetchVideos(); // Fetch the videos when the screen loads
   }
 
-
   // Replace 'YOUR_API_URL' with the actual URL of your PHP file
   Future<List<VideoItem>> fetchVideos() async {
-    final response = await http.get(Uri.parse('https://climaxitbd.com/php/course/get_videos_list.php'));
-
-
+    final response = await http.get(
+        Uri.parse('https://climaxitbd.com/php/course/get_videos_list.php'));
 
     if (response.statusCode == 200) {
       List data = json.decode(response.body);
 
-      return data.map((video) => VideoItem(
-        imageUrl: video['image_url'],
-        title: video['title'],
-        duration: video['duration'],
-        videoLink: video['video_link'],
-      )).toList();
+      return data
+          .map((video) => VideoItem(
+                imageUrl: video['image_url'],
+                title: video['title'],
+                duration: video['duration'],
+                videoLink: video['video_link'],
+              ))
+          .toList();
     } else {
       throw Exception('Failed to load videos');
     }
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -71,7 +71,8 @@ class _VideoListScreenState extends State<VideoListScreen> {
             return Center(child: CustomCircularIndicator());
           } else if (snapshot.hasError) {
             // Show an error message if the request fails
-            return Center(child: Text('Failed to load videos: ${snapshot.error}'));
+            return Center(
+                child: Text('Failed to load videos: ${snapshot.error}'));
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
             // Show a message if there is no data
             return Center(child: Text('No videos available.'));
@@ -84,28 +85,29 @@ class _VideoListScreenState extends State<VideoListScreen> {
                 final video = videos[index];
                 return GestureDetector(
                   onTap: () {
-                    // Navigate to a different page when clicked
+                    // Get the verification provider
+                    final verificationProvider =
+                        Provider.of<VerificationProvider>(context,
+                            listen: false);
 
-                    if(verificationService.isVerified){
+                    // Check verification status
+                    if (verificationProvider.isVerified) {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => VideoDetailPage(videoLink: video.videoLink),
+                          builder: (context) =>
+                              VideoDetailPage(videoLink: video.videoLink),
                         ),
                       );
-
-                    }else{
-                      SnackBar(
-                        content: Text(
-                          "আপনার একাউন্ট ভেরিফাইড নয়। একাউট ভেরিফাই করুন । ধন্যবাদ",
-                          style: TextStyle(color: Colors.white), // Text color
-                        ),
-                        backgroundColor: Colors.red, // Red background color
-                        duration: Duration(seconds: 3), // Duration for visibility
+                    } else {
+                      // Show verification required message
+                      verificationProvider.requireVerification(
+                        context,
+                        message:
+                            "আপনার একাউন্ট ভেরিফাইড নয়। একাউট ভেরিফাই করুন । ধন্যবাদ",
+                        showDialog: true,
                       );
                     }
-
-
                   },
                   child: Padding(
                     padding: const EdgeInsets.only(left: 16.0, right: 16),
@@ -113,7 +115,8 @@ class _VideoListScreenState extends State<VideoListScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Card(
-                          margin: EdgeInsets.symmetric(vertical: 10, horizontal: 15),
+                          margin: EdgeInsets.symmetric(
+                              vertical: 10, horizontal: 15),
                           child: Column(
                             children: [
                               // Image Thumbnail with fixed size
@@ -137,7 +140,8 @@ class _VideoListScreenState extends State<VideoListScreen> {
                             children: [
                               Text(
                                 video.title,
-                                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                                style: TextStyle(
+                                    fontWeight: FontWeight.bold, fontSize: 16),
                                 overflow: TextOverflow.ellipsis,
                                 maxLines: 2,
                               ),

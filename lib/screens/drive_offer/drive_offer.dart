@@ -5,8 +5,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
 
 import '../../main.dart';
+import '../../auth/saved_login/user_session.dart';
+import '../../providers/verification_provider.dart';
 
 class DriveOfferScreen extends StatefulWidget {
   const DriveOfferScreen({super.key});
@@ -19,10 +22,12 @@ class _DriveOfferScreenState extends State<DriveOfferScreen> {
   int? operatorId;
   int? categoryId;
   List<dynamic> offers = [];
+  String? userId;
+  bool isLoading = false;
 
   final operators = [
     {'id': 1, 'name': 'রবি', 'logo': 'assets/icons/robi.png'},
-    {'id': 2, 'name': 'এয়ারটেল', 'logo': 'assets/icons/airtel.png'},
+    {'id': 2, 'name': 'এয়ারটেল', 'logo': 'assets/icons/airtel.png'},
     {'id': 3, 'name': 'বাংলালিংক', 'logo': 'assets/icons/banglalink.png'},
     {'id': 4, 'name': 'গ্রামীণ', 'logo': 'assets/icons/gp.png'},
     {'id': 5, 'name': 'টেলিটক', 'logo': 'assets/icons/teletalk.png'},
@@ -35,8 +40,26 @@ class _DriveOfferScreenState extends State<DriveOfferScreen> {
     {'id': 3, 'name': 'মিনিট'},
   ];
 
+  @override
+  void initState() {
+    super.initState();
+    _loadUserId(); // Load user ID at initialization
+  }
+
+  Future<void> _loadUserId() async {
+    String? storedUserId = await UserSession.getUserID();
+    setState(() {
+      userId = storedUserId;
+    });
+  }
+
   Future<void> fetchOffers() async {
     if (operatorId == null || categoryId == null) return;
+
+    setState(() {
+      isLoading = true;
+    });
+
     final url =
         'https://climaxitbd.com/php/drive_offer/user/get_offer.php?operator_id=$operatorId&category_id=$categoryId';
     try {
@@ -44,20 +67,28 @@ class _DriveOfferScreenState extends State<DriveOfferScreen> {
       if (response.statusCode == 200) {
         setState(() {
           offers = json.decode(response.body);
-          print(response.body);
+          isLoading = false;
         });
       } else {
         setState(() {
           offers = [];
+          isLoading = false;
         });
-        print('Failed to load offers');
+        _showMessage('Failed to load offers');
       }
     } catch (e) {
       setState(() {
         offers = [];
+        isLoading = false;
       });
-      print('Error: $e');
+      _showMessage('Error: $e');
     }
+  }
+
+  void _showMessage(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message)),
+    );
   }
 
   void _copyOffersList() {
@@ -77,6 +108,26 @@ class _DriveOfferScreenState extends State<DriveOfferScreen> {
         SnackBar(content: Text('Offers copied to clipboard')),
       );
     });
+  }
+
+  void _navigateToOfferDetails(Map<String, dynamic> offer) {
+    if (userId == null) {
+      _showMessage('Please log in to access this feature');
+      return;
+    }
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => RequestDriveOffer(
+          id: offer['id'],
+          title: offer['title'],
+          description: offer['description'],
+          price: offer['price'].toString(),
+          userId: userId!,
+        ),
+      ),
+    );
   }
 
   @override
@@ -176,54 +227,44 @@ class _DriveOfferScreenState extends State<DriveOfferScreen> {
           ),
           SizedBox(height: 20),
           Expanded(
-              child: offers.isEmpty
-                  ? Center(
-                      child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Text(
-                          'প্রথমে একটি সিম অফারেটর ও একটি অফার ক্যাটাগরি সিলেক্ট করুন'),
-                    ))
-                  : ListView.builder(
-                      itemCount: offers.length,
-                      itemBuilder: (context, index) {
-                        final offer = offers[index];
+              child: isLoading
+                  ? Center(child: CircularProgressIndicator())
+                  : offers.isEmpty
+                      ? Center(
+                          child: Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Text(
+                              'প্রথমে একটি সিম অফারেটর ও একটি অফার ক্যাটাগরি সিলেক্ট করুন'),
+                        ))
+                      : ListView.builder(
+                          itemCount: offers.length,
+                          itemBuilder: (context, index) {
+                            final offer = offers[index];
 
-                        // Find the operator's logo based on the selected operatorId
-                        final operator = operators.firstWhere(
-                          (op) => op['id'] == operatorId,
-                          orElse: () => {'logo': ''}, // Fallback logo
-                        );
+                            // Find the operator's logo based on the selected operatorId
+                            final operator = operators.firstWhere(
+                              (op) => op['id'] == operatorId,
+                              orElse: () => {'logo': ''}, // Fallback logo
+                            );
 
-                        return Card(
-                          margin:
-                              EdgeInsets.symmetric(vertical: 5, horizontal: 10),
-                          child: ListTile(
-                            leading: Image.asset(
-                              operator['logo'] as String,
-                              width: 30,
-                              height: 30,
-                              fit: BoxFit.contain,
-                            ),
-                            title: Text(offer['title']),
-                            subtitle: Text(
-                                '${offer['description']} । \nপ্রাইস: ${offer['price']} টাকা'),
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => RequestDriveOffer(
-                                    id: offer['id'],
-                                    title: offer['title'],
-                                    description: offer['description'],
-                                    price: offer['price'].toString(),
-                                  ),
+                            return Card(
+                              margin: EdgeInsets.symmetric(
+                                  vertical: 5, horizontal: 10),
+                              child: ListTile(
+                                leading: Image.asset(
+                                  operator['logo'] as String,
+                                  width: 30,
+                                  height: 30,
+                                  fit: BoxFit.contain,
                                 ),
-                              );
-                            },
-                          ),
-                        );
-                      },
-                    ))
+                                title: Text(offer['title']),
+                                subtitle: Text(
+                                    '${offer['description']} । \nপ্রাইস: ${offer['price']} টাকা'),
+                                onTap: () => _navigateToOfferDetails(offer),
+                              ),
+                            );
+                          },
+                        ))
         ],
       ),
     );

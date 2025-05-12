@@ -1,7 +1,7 @@
 import 'package:climax_it_user_app/screens/my_work_screen/task_screen.dart';
 import 'package:flutter/material.dart';
-import '../../auth/verification/verification_service.dart';
-
+import 'package:provider/provider.dart';
+import '../../providers/verification_provider.dart';
 
 class MyWorkScreen extends StatefulWidget {
   const MyWorkScreen({super.key});
@@ -11,16 +11,10 @@ class MyWorkScreen extends StatefulWidget {
 }
 
 class _MyWorkScreenState extends State<MyWorkScreen> {
-  final VerificationService verificationService = VerificationService();
-
-  @override
-  void initState() {
-    super.initState();
-    verificationService.initialize();
-  }
-
   @override
   Widget build(BuildContext context) {
+    final verificationProvider = Provider.of<VerificationProvider>(context);
+
     return Scaffold(
       appBar: AppBar(
         title: Text("My Works"),
@@ -36,7 +30,7 @@ class _MyWorkScreenState extends State<MyWorkScreen> {
                 child: Column(
                   children: [
                     Text(
-                      "প্রিয় গ্রাহক",
+                      "প্রিয় গ্রাহক",
                       style:
                           TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                     ),
@@ -58,11 +52,18 @@ class _MyWorkScreenState extends State<MyWorkScreen> {
                 width: double.maxFinite,
                 child: ElevatedButton(
                   onPressed: () {
-                    Navigator.push(
+                    if (verificationProvider.isVerified) {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => TaskScreen()));
+                    } else {
+                      verificationProvider.requireVerification(
                         context,
-                        MaterialPageRoute(
-                            builder: (context) => TaskScreen()));
-                    
+                        message:
+                            "আপনার একাউন্ট ভেরিফাইড নয়। একাউট ভেরিফাই করুন । ধন্যবাদ",
+                      );
+                    }
                   },
                   child: Text(
                     "আমার কাজ",

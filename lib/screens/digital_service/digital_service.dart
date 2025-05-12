@@ -4,8 +4,9 @@ import 'package:climax_it_user_app/widgets/custom_circular_indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
 
-import '../../main.dart';
+import '../../providers/verification_provider.dart';
 import '../support/support_screen.dart';
 
 class DigitalServiceScreen extends StatefulWidget {
@@ -81,26 +82,23 @@ class AppGridItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: () {
+        final verificationProvider =
+            Provider.of<VerificationProvider>(context, listen: false);
 
-        if(verificationService.isVerified){
-
+        if (verificationProvider.isVerified) {
           Navigator.push(
             context,
             MaterialPageRoute(
                 builder: (context) =>
                     SupportScreen()), // Navigate to the support screen
           );
-        }else{
-          SnackBar(
-            content: Text(
-              "আপনার একাউন্ট ভেরিফাইড নয়। একাউট ভেরিফাই করুন । ধন্যবাদ",
-              style: TextStyle(color: Colors.white), // Text color
-            ),
-            backgroundColor: Colors.red, // Red background color
-            duration: Duration(seconds: 3), // Duration for visibility
+        } else {
+          verificationProvider.requireVerification(
+            context,
+            message: "আপনার একাউন্ট ভেরিফাইড নয়। একাউট ভেরিফাই করুন । ধন্যবাদ",
+            showDialog: true,
           );
         }
-
       },
       child: Container(
         margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),

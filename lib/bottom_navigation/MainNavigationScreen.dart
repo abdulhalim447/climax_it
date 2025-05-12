@@ -1,7 +1,8 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:persistent_bottom_nav_bar/persistent_bottom_nav_bar.dart';
+import 'package:flutter/cupertino.dart';
 
 import '../auth/saved_login/user_session.dart';
 import '../screens/home_screen/home_screen.dart';
@@ -18,151 +19,93 @@ class MainNavigationScreen extends StatefulWidget {
 }
 
 class _MainNavigationScreenState extends State<MainNavigationScreen> {
-  int _selectedIndex = 0;
-  bool isVerified = false;
-  String userId = "";
-  String name = "";
-  String email = "";
+  late PersistentTabController _controller;
 
   @override
   void initState() {
     super.initState();
-    _userInfo().then((_) {
-      if (userId.isNotEmpty) {
-        _checkUserVerification(); // Only check verification after userId is set
-      }
-    });
+    _controller = PersistentTabController(initialIndex: 0);
   }
 
-  Future<void> _userInfo() async {
-    try {
-      String? fetchedUserId = await UserSession.getUserID();
-      String? fetchedEmail = await UserSession.getEmail();
-      String? fetchedName = await UserSession.getName();
-
-      // Null চেক করে UI আপডেট করো
-      if (fetchedUserId != null &&
-          fetchedEmail != null &&
-          fetchedName != null) {
-        setState(() {
-          userId = fetchedUserId;
-          email = fetchedEmail;
-          name = fetchedName;
-        });
-
-      } else {
-       // print("User data is null");
-      }
-    } catch (e) {
-      //print("Error fetching user info: $e");
-    }
+  List<Widget> _buildScreens() {
+    return [
+      HomePage(),
+      WalletScreen(),
+      ShoppingScreen(),
+      ReferralPage(),
+      ProfilePage(),
+    ];
   }
 
-  Future<void> _checkUserVerification() async {
-    try {
-      final response = await http.get(Uri.parse(
-          "https://climaxitbd.com/php/wallet/check_user_verify.php?user_id=$userId"));
-
-
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-
-        // Make sure we're checking the exact value and type
-        setState(() {
-          // Convert to int first to ensure proper comparison
-          int verificationStatus = data["isVarified"] is String
-              ? int.parse(data["isVarified"])
-              : data["isVarified"];
-          isVerified = verificationStatus == 1;
-        });
-
-        print("Verification Status: $isVerified");
-      } else {
-        setState(() {
-          isVerified = false; // Default to false on error
-        });
-      }
-    } catch (e) {
-      setState(() {
-        isVerified = false; // Default to false on error
-      });
-    }
-  }
-
-  // List of screens for each BottomNavigationBar item
-  final List<Widget> _pages = [
-    HomePage(),
-    WalletScreen(),
-    ShoppingScreen(),
-    ReferralPage(),
-    ProfilePage(),
-
-/*    CardScreen(),
-    ContactScreen(),
-    ProfileScreen(),*/
-  ];
-
-  void _onItemTapped(int index) {
-    if (index == 1 || index == 2 || index == 3 || index == 4) {
-      // Wallet, Shopping, Profile
-      if (!isVerified) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text("আপনার একাউন্টটি ভেরিফাই করুন!"),
-            duration: Duration(seconds: 2),
-            backgroundColor: Colors.red,
-          ),
-        );
-        return; // Prevent navigation if not verified
-      }
-    }
-    setState(() {
-      _selectedIndex = index;
-    });
+  List<PersistentBottomNavBarItem> _navBarsItems() {
+    return [
+      PersistentBottomNavBarItem(
+        icon: Icon(Icons.home),
+        title: "হোম",
+        activeColorPrimary: Colors.blue,
+        inactiveColorPrimary: Colors.black,
+      ),
+      PersistentBottomNavBarItem(
+        icon: Icon(Icons.wallet),
+        title: "ওয়ালেট",
+        activeColorPrimary: Colors.blue,
+        inactiveColorPrimary: Colors.blue.shade200,
+      ),
+      PersistentBottomNavBarItem(
+        icon: Icon(
+          Icons.shopping_bag_rounded,
+          color: Colors.white,
+        ),
+        title: "শপিং",
+        activeColorPrimary: Colors.blue,
+        inactiveColorPrimary: Colors.blue.shade200,
+      ),
+      PersistentBottomNavBarItem(
+        icon: Icon(Icons.groups),
+        title: "টিম",
+        activeColorPrimary: Colors.blue,
+        inactiveColorPrimary: Colors.blue.shade200,
+      ),
+      PersistentBottomNavBarItem(
+        icon: Icon(Icons.person),
+        title: "প্রোফাইল",
+        activeColorPrimary: Colors.blue,
+        inactiveColorPrimary: Colors.blue.shade200,
+      ),
+    ];
   }
 
   @override
   Widget build(BuildContext context) {
     final double screenWidth = MediaQuery.of(context).size.width;
-    print("Screen width: $screenWidth"); // স্ক্রিন প্রস্থ দেখুন
     final bool isMobile = screenWidth < 600;
 
     return Scaffold(
-      body: _pages[_selectedIndex], // Display the selected screen
-      bottomNavigationBar: Padding(
+      body: PersistentTabView(
+        context,
+        controller: _controller,
+        screens: _buildScreens(),
+        items: _navBarsItems(),
+        confineToSafeArea: true,
+        backgroundColor: Colors.white,
+        handleAndroidBackButtonPress: true,
+        resizeToAvoidBottomInset: true,
+        stateManagement: true,
+        decoration: NavBarDecoration(
+          borderRadius: BorderRadius.circular(10.0),
+          colorBehindNavBar: Colors.white,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.3),
+              spreadRadius: 1,
+              blurRadius: 5,
+              offset: Offset(0, 3),
+            ),
+          ],
+        ),
+        navBarStyle: NavBarStyle.style15,
         padding: EdgeInsets.symmetric(
-            horizontal: isMobile ? 0 : (screenWidth - 600) / 2),
-        child: SizedBox(
-          width: isMobile ? double.infinity : 600,
-          child: BottomNavigationBar(
-            backgroundColor: Colors.blue,
-            selectedItemColor: Colors.blue,
-            unselectedItemColor: Colors.black,
-            currentIndex: _selectedIndex,
-            onTap: _onItemTapped,
-            items: [
-              BottomNavigationBarItem(
-                icon: Icon(Icons.home),
-                label: 'হোম',
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.wallet),
-                label: 'ওয়ালেট',
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.shop),
-                label: 'শপিং',
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.groups),
-                label: 'টিম',
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.person),
-                label: 'প্রোফাইল',
-              ),
-            ],
-          ),
+          horizontal: isMobile ? 0 : (screenWidth - 600) / 2,
         ),
       ),
     );

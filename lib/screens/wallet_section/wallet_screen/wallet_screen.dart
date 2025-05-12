@@ -54,12 +54,12 @@ class _WalletScreenState extends State<WalletScreen> {
         }
       } else {
         setState(() {
-          balance = "Server Error!";
+          balance = "00 BDT";
         });
       }
     } catch (e) {
       setState(() {
-        balance = "Failed to load balance!";
+        balance = "00 BDT";
       });
     }
   }

@@ -1,8 +1,8 @@
 import 'package:climax_it_user_app/screens/micro_job/submit_proof.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
-
-import '../../main.dart';
+import 'package:provider/provider.dart';
+import '../../providers/verification_provider.dart';
 
 class MicroWorkScreen extends StatelessWidget {
   final Map<String, dynamic> item;
@@ -11,6 +11,9 @@ class MicroWorkScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final verificationProvider =
+        Provider.of<VerificationProvider>(context, listen: false);
+
     return Scaffold(
       appBar: AppBar(
         title: Text('মাইক্রো জব বিবরণ'),
@@ -52,21 +55,18 @@ class MicroWorkScreen extends StatelessWidget {
                 width: double.maxFinite,
                 child: ElevatedButton(
                   onPressed: () async {
-                    if (verificationService.isVerified) {
+                    if (verificationProvider.isVerified) {
                       if (await canLaunch(item['work_link'])) {
                         await launch(item['work_link']);
                       } else {
                         throw 'Could not launch ${item['work_link']}';
                       }
                     } else {
-                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                        content: Text(
-                          "আপনার একাউন্ট ভেরিফাইড নয়। একাউট ভেরিফাই করুন । ধন্যবাদ",
-                          style: TextStyle(color: Colors.white),
-                        ),
-                        backgroundColor: Colors.red,
-                        duration: Duration(seconds: 3),
-                      ));
+                      verificationProvider.requireVerification(
+                        context,
+                        message:
+                            "আপনার একাউন্ট ভেরিফাইড নয়। একাউট ভেরিফাই করুন । ধন্যবাদ",
+                      );
                     }
                   },
                   style: ElevatedButton.styleFrom(backgroundColor: Colors.blue),
@@ -83,21 +83,18 @@ class MicroWorkScreen extends StatelessWidget {
                 width: double.maxFinite,
                 child: ElevatedButton(
                   onPressed: () {
-                    if (verificationService.isVerified) {
+                    if (verificationProvider.isVerified) {
                       Navigator.push(
                           context,
                           MaterialPageRoute(
                               builder: (context) =>
                                   ImageUploadScreen(taskID: item['task_id'])));
                     } else {
-                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                        content: Text(
-                          "আপনার একাউন্ট ভেরিফাইড নয়। একাউট ভেরিফাই করুন । ধন্যবাদ",
-                          style: TextStyle(color: Colors.white),
-                        ),
-                        backgroundColor: Colors.red,
-                        duration: Duration(seconds: 3),
-                      ));
+                      verificationProvider.requireVerification(
+                        context,
+                        message:
+                            "আপনার একাউন্ট ভেরিফাইড নয়। একাউট ভেরিফাই করুন । ধন্যবাদ",
+                      );
                     }
                   },
                   style: ElevatedButton.styleFrom(backgroundColor: Colors.blue),

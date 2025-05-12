@@ -2,9 +2,10 @@ import 'package:climax_it_user_app/screens/donation/donation_pay.dart';
 import 'package:flutter/material.dart';
 import 'dart:convert'; // JSON parsing
 import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
 
 import '../../auth/saved_login/user_session.dart';
-import '../../main.dart';
+import '../../providers/verification_provider.dart';
 
 class DonationScreen extends StatefulWidget {
   const DonationScreen({super.key});
@@ -211,26 +212,27 @@ class _DonationScreenState extends State<DonationScreen> {
               const SizedBox(height: 20),
               SizedBox(
                 width: double.maxFinite,
-                child: ElevatedButton(
-                  onPressed: () {
-                    if (verificationService.isVerified) {
-                      _handleDonation();
-                    } else {
-                      SnackBar(
-                        content: Text(
-                          "আপনার একাউন্ট ভেরিফাইড নয়। একাউট ভেরিফাই করুন । ধন্যবাদ",
-                          style: TextStyle(color: Colors.white), // Text color
-                        ),
-                        backgroundColor: Colors.red, // Red background color
-                        duration:
-                            Duration(seconds: 3), // Duration for visibility
-                      );
-                    }
+                child: Consumer<VerificationProvider>(
+                  builder: (context, verificationProvider, _) {
+                    return ElevatedButton(
+                      onPressed: () {
+                        if (verificationProvider.isVerified) {
+                          _handleDonation();
+                        } else {
+                          verificationProvider.requireVerification(
+                            context,
+                            message:
+                                "আপনার একাউন্ট ভেরিফাইড নয়। একাউট ভেরিফাই করুন । ধন্যবাদ",
+                            showDialog: true,
+                          );
+                        }
+                      },
+                      child: const Text(
+                        'Help',
+                        style: TextStyle(color: Colors.white),
+                      ),
+                    );
                   },
-                  child: const Text(
-                    'Help',
-                    style: TextStyle(color: Colors.white),
-                  ),
                 ),
               ),
             ],

@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:climax_it_user_app/main.dart';
+import 'package:climax_it_user_app/providers/verification_provider.dart';
 import 'package:climax_it_user_app/screens/app_download/app_download.dart';
 import 'package:climax_it_user_app/screens/micro_job/show_job_grid.dart';
 import 'package:climax_it_user_app/screens/order_history/order_history.dart';
@@ -7,6 +8,8 @@ import 'package:climax_it_user_app/screens/support/live_support.dart';
 import 'package:climax_it_user_app/screens/wallet_section/wallet_screen/withdraw_screen.dart';
 import 'package:climax_it_user_app/services/theme_provider.dart';
 import 'package:climax_it_user_app/widgets/custom_circular_indicator.dart';
+import 'package:climax_it_user_app/widgets/notification_dialog.dart';
+import 'package:climax_it_user_app/widgets/verification_banner.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
@@ -202,8 +205,8 @@ class _HomePageState extends State<HomePage> {
         displacement: 40.0,
         strokeWidth: 3.0,
         child: SingleChildScrollView(
-          physics:
-              AlwaysScrollableScrollPhysics(), // Important for RefreshIndicator to work
+          physics: AlwaysScrollableScrollPhysics(),
+          // Important for RefreshIndicator to work
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -218,6 +221,7 @@ class _HomePageState extends State<HomePage> {
               // আসন্ন ফিচার সমূহ
               _buildSectionTitle('আসন্ন ফিচার-সমূহ'),
               _buildUpcomingFeatureGrid(),
+              SizedBox(height: 30),
             ],
           ),
         ),
@@ -260,10 +264,41 @@ class _HomePageState extends State<HomePage> {
 
         // নোটিফিকেশন আইকন
         IconButton(
-          icon: const Icon(Icons.notifications),
+          icon: Stack(
+            children: [
+              const Icon(Icons.notifications),
+              Positioned(
+                right: 0,
+                top: 0,
+                child: Container(
+                  padding: EdgeInsets.all(2),
+                  decoration: BoxDecoration(
+                    color: Colors.red,
+                    shape: BoxShape.circle,
+                  ),
+                  constraints: BoxConstraints(
+                    minWidth: 14,
+                    minHeight: 14,
+                  ),
+                  child: Center(
+                    child: Text(
+                      '1',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 8,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
           onPressed: () {
-            Navigator.push(context,
-                MaterialPageRoute(builder: (context) => NotificationScreen()));
+            // Testing URL detection in notifications
+            // Comment out the line below and uncomment the test line to test URL detection
+            NotificationDialog.show(context);
+            // To test URL detection in notifications, uncomment the next line:
+            // NotificationDialog.showTest(context);
           },
         ),
 
@@ -272,7 +307,7 @@ class _HomePageState extends State<HomePage> {
           icon: const Icon(Icons.call),
           onPressed: () {
             // এখানে ফোন কল করার লজিক যুক্ত করুন
-            _launchURL('tel:09647374259');
+            _launchURL('tel:+8801928374259');
           },
         ),
       ],
@@ -295,7 +330,7 @@ class _HomePageState extends State<HomePage> {
               ]),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
-                  return Center(child: CustomCircularIndicator());
+                  return Center(child: CircularProgressIndicator());
                 } else if (snapshot.hasError) {
                   return Center(
                     child: Text(
@@ -309,58 +344,69 @@ class _HomePageState extends State<HomePage> {
                   final referCode = data[1] ?? "No Refer Code";
                   final profilepic = data[2] ?? "No Refer Code";
 
-                  return Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      CircleAvatar(
-                        radius: 40,
-                        backgroundImage: NetworkImage(
-                          'https://climaxitbd.com/php/profile/$profilepic',
-                        ),
-                      ),
-                      SizedBox(height: 8),
-                      Text(
-                        name + (verificationService.isVerified ? ' *️⃣' : ''),
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      Row(
-                        children: [
-                          Flexible(
-                            child: Text(
-                              'রেফার কোড: $referCode',
+                  return Consumer<VerificationProvider>(
+                    builder: (context, verificationProvider, _) {
+                      return Padding(
+                        padding: const EdgeInsets.only(left: 16.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            CircleAvatar(
+                              radius: 40,
+                              backgroundImage: NetworkImage(
+                                'https://climaxitbd.com/php/profile/$profilepic',
+                              ),
+                            ),
+                            SizedBox(height: 8),
+                            Text(
+                              name +
+                                  (verificationProvider.isVerified
+                                      ? ' *️⃣'
+                                      : ''),
                               style: TextStyle(
                                 color: Colors.white,
-                                fontSize: 10,
+                                fontSize: 14,
                                 fontWeight: FontWeight.bold,
                               ),
-                              overflow: TextOverflow.ellipsis,
                             ),
-                          ),
-                          SizedBox(width: 8),
-                          GestureDetector(
-                            onTap: () {
-                              Clipboard.setData(
-                                  ClipboardData(text: referCode));
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text('রেফার কোড কপি হয়েছে!'),
-                                  duration: Duration(seconds: 2),
+                            Row(
+                              children: [
+                                Flexible(
+                                  child: Text(
+                                    'রেফার কোড: $referCode',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
                                 ),
-                              );
-                            },
-                            child: Icon(
-                              Icons.copy,
-                              size: 18,
-                              color: Colors.white,
+                                SizedBox(width: 8),
+                                GestureDetector(
+                                  onTap: () {
+                                    Clipboard.setData(
+                                        ClipboardData(text: referCode));
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text('রেফার কোড কপি হয়েছে!'),
+                                        duration: Duration(seconds: 2),
+                                      ),
+                                    );
+                                  },
+                                  child: Icon(
+                                    Icons.copy,
+                                    size: 18,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ],
                             ),
-                          ),
-                        ],
-                      ),
-                    ],
+                          ],
+                        ),
+                      );
+                    },
                   );
                 }
               },
@@ -574,110 +620,36 @@ class _HomePageState extends State<HomePage> {
     required String userId,
     required String orderId,
   }) async {
-    const String baseURL = "https://pay.climaxitbd.com/";
-    const String apiKey = "58c3af0decc37110a275a8ecabc4d68d6955fc80"; // API key
+    // Get the provider
+    final verificationProvider =
+        Provider.of<VerificationProvider>(context, listen: false);
 
-    final Uri url = Uri.parse("${baseURL}api/checkout-v2");
+    // Use the provider to initiate verification
+    String? paymentUrl =
+        await verificationProvider.initiateVerification(amount: amount);
 
-    final Map<String, dynamic> fields = {
-      "full_name": fullName,
-      "email": email,
-      "amount": amount,
-      "metadata": {"user_id": userId, "order_id": orderId},
-      "redirect_url": "${baseURL}success.php",
-      "return_type": "GET",
-      "cancel_url": "${baseURL}cancel.php",
-      "webhook_url":
-          "https://pay.climaxitbd.com/callback/ae673c586c0a56ce5c10a304bd1c26e0cd87d120"
-      // webhook ====
-    };
-
-    try {
-      final response = await http.post(
-        url,
-        headers: {
-          "RT-UDDOKTAPAY-API-KEY": apiKey,
-          "Accept": "application/json",
-          "Content-Type": "application/json"
-        },
-        body: jsonEncode(fields),
+    if (paymentUrl != null) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (context) => PaymentWebView(
+                  paymentUrl: paymentUrl,
+                )),
       );
-
-      print("Response: ${response.body}");
-
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        print("Payment URL: ${data['payment_url']}");
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-              builder: (context) => PaymentWebView(
-                    paymentUrl: data['payment_url'],
-                  )),
-        );
-      } else {
-        print("Error: ${response.body}");
-      }
-    } catch (e) {
-      print("Exception: $e");
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Payment initiation failed. Please try again.'),
+          backgroundColor: Colors.red,
+        ),
+      );
     }
   }
 
 //=============================================================================
   Widget _idVerificationSection() {
-    // If verified, return an empty container (invisible)
-    if (verificationService.isVerified) {
-      return const SizedBox.shrink();
-    }
-
-    // Show verification section only if not verified
-    return Container(
-      margin: const EdgeInsets.all(16),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.red.shade100,
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'আপনার একাউন্টটি ভেরিফাই করুন!',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-              color: Colors.red,
-            ),
-          ),
-          const SizedBox(height: 8),
-          const Text(
-            'আমাদের সকল সার্ভিস ব্যবহার করতে আপনার একাউন্টটি ভেরিফাই করুন। ধন্যবাদ।',
-            style: TextStyle(color: Colors.red, fontSize: 14),
-          ),
-          const SizedBox(height: 12),
-          Align(
-            alignment: Alignment.center,
-            child: ElevatedButton(
-              onPressed: () async {
-                createCheckout(
-                    fullName: name,
-                    email: email,
-                    amount: '500',
-                    userId: userId,
-                    orderId: '');
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.red,
-              ),
-              child: const Text(
-                'ভেরিফাই করুন',
-                style: TextStyle(color: Colors.white),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
+    // Replace the verification service with the provider
+    return VerificationBanner();
   }
 
   Widget _buildSectionTitle(String title) {

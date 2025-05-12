@@ -1,5 +1,7 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_linkify/flutter_linkify.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../services/firebase_messaging_service.dart';
 import '../main.dart';
 
@@ -24,9 +26,31 @@ class _PushNotificationHandlerState extends State<PushNotificationHandler> {
     messagingService.notificationStream.listen(_showNotification);
   }
 
+  // Open URL when tapped
+  Future<void> _onOpen(LinkableElement link) async {
+    final Uri uri = Uri.parse(link.url);
+    try {
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(uri, mode: LaunchMode.externalApplication);
+      } else {
+        // Fallback to search
+        await launchUrl(
+            Uri.parse('https://www.google.com/search?q=${link.url}'));
+      }
+    } catch (e) {
+      print("Could not launch URL: $e");
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Could not open the link')),
+      );
+    }
+  }
+
   void _showNotification(RemoteMessage message) {
     // Show a simple SnackBar notification when a message is received
     if (message.notification != null) {
+      final title = message.notification!.title ?? 'New Notification';
+      final body = message.notification!.body ?? '';
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Column(
@@ -34,14 +58,23 @@ class _PushNotificationHandlerState extends State<PushNotificationHandler> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                message.notification!.title ?? 'New Notification',
+                title,
                 style: const TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 16,
                 ),
               ),
               const SizedBox(height: 4),
-              Text(message.notification!.body ?? ''),
+              Linkify(
+                onOpen: _onOpen,
+                text: body,
+                style: const TextStyle(color: Colors.white),
+                linkStyle: const TextStyle(
+                  color: Colors.lightBlueAccent,
+                  decoration: TextDecoration.underline,
+                ),
+                options: const LinkifyOptions(humanize: false),
+              ),
             ],
           ),
           action: SnackBarAction(
